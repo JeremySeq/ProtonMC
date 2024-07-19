@@ -1,6 +1,3 @@
-import socket
-from mcipc.query import Client as Query
-from mcipc.rcon.je import Client
 import os
 import shutil
 import psutil
@@ -10,17 +7,12 @@ import subprocess
 from threading import Thread
 import zipfile
 import time
-import re
 from util import *
 import progressbar
 
 
 class MCserver:
-    def __init__(self, name, ip, query_port, rcon_port, password, server_location, backup_location):
-        self.ip = ip
-        self.query_port = query_port
-        self.rcon_port = rcon_port
-        self.password = password
+    def __init__(self, name, server_location, backup_location):
         self.server_location = server_location
         self.backup_location = backup_location
         self.name = name
@@ -29,45 +21,10 @@ class MCserver:
         self.backup_thread = None
         self.backup_progress = 0
         self.command_queue = Queue()
-        self.isOperational = False
+        self.is_operational = False
 
     def __str__(self):
         return self.name
-
-    def isOn(self):
-        try:
-            with Client(self.ip, self.query_port, timeout=1.5) as client:
-                return True
-        except socket.timeout as timeout:
-            return False
-        except ConnectionRefusedError as e:
-            return False
-
-    def connectRCON(self) -> bool:
-        if self.client_connected:
-            return True
-        try:
-            # self.client = Client(self.ip, self.rcon_port, timeout=1.5)
-            self.client.connect()
-            return True
-        except ConnectionRefusedError as error:
-            return False
-
-    def getSeed(self):
-        with Client(self.ip, self.rcon_port, passwd=self.password) as client:
-            seed = client.seed
-            return seed
-
-    def getPlayers(self) -> list[str]:
-        try:
-            with Query(self.ip, self.query_port) as client:
-                return client.stats(full=True)["players"]
-        except socket.timeout as timeout:
-            return []
-        except ConnectionRefusedError as e:
-            return []
-        except ConnectionResetError as e:
-            return []
 
     def stop(self):
         self.runCommand("stop")
@@ -314,12 +271,12 @@ class MCserver:
     def isServerOperational(self) -> bool:
         if not self.isServerRunning():
             return False
-        if self.isOperational:
+        if self.is_operational:
             return True
         if self.isServerRunning():
             for line in self.console:
                 if "[Server thread/INFO]" in line and "Done" in line:
-                    self.isOperational = True
+                    self.is_operational = True
                     return True
             return False
         return False
@@ -358,7 +315,7 @@ class MCserver:
         self.console.clear()
 
         # set operational status as false in case it was true before
-        self.isOperational = False
+        self.is_operational = False
 
         serverRunPath = self.server_location + "run.bat"
 

@@ -37,6 +37,14 @@ def get_server_status(server):
     server = servers.getServerByName(server)
     return jsonify({"message": [server.isServerRunning(), server.isServerOperational()]}), 200
 
+@server_routes.route('/<server>/status/players')
+@token_required
+@check_server_exists
+def get_server_players(server):
+    """Returns the players currently on the server"""
+    server = servers.getServerByName(server)
+    return jsonify({"players": server.players}), 200
+
 @server_routes.route('/<server>/uptime', methods=["GET"])
 @token_required
 @check_server_exists

@@ -22,6 +22,7 @@ class MCserver:
         self.backup_progress = 0
         self.command_queue = Queue()
         self.is_operational = False
+        self.players = []
 
     def __str__(self):
         return self.name
@@ -313,6 +314,8 @@ class MCserver:
 
         # clear console: this is necessary so that isServerOperational doesn't find "Done" in the console from the previous run
         self.console.clear()
+        
+        self.players.clear()
 
         # set operational status as false in case it was true before
         self.is_operational = False
@@ -356,9 +359,21 @@ class MCserver:
                 else:
                     if line:
                         print(line.strip())
+                        line = line.strip()
+
+                        if "Server thread/INFO" in getConsoleTags(line):
+                            text_after_tags = getTextAfterTags(line)
+                            if didPlayerJoin(text_after_tags):
+                                self.players.append(didPlayerJoin(text_after_tags))
+                                print("PLAYER JOINED:", didPlayerJoin(text_after_tags))
+                            if didPlayerLeave(text_after_tags):
+                                self.players.remove(didPlayerLeave(text_after_tags))
+                                print("PLAYER LEFT:", didPlayerLeave(text_after_tags))
+
                         line = hideIPIfPlayerJoined(line)
                         self.console.append(line.strip())
         finally:
+            self.players.clear()
             print("Subprocess ended, joining thread.")
             ts.join(timeout=5)  # Add timeout to ensure the thread doesn't hang
             if ts.is_alive():

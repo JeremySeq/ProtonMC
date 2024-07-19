@@ -11,6 +11,7 @@ function Overview() {
     const [serverOperationalStatus, setServerOperationalStatus] = useState(false);
     const [serverStartTime, setServerStartTime] = useState(false);
     const [serverUptime, setServerUptime] = useState(false);
+    const [playerList, setPlayerList] = useState([]);
 
     const { serverName } = useParams();
     const navigate = useNavigate();
@@ -58,6 +59,21 @@ function Overview() {
         }
     }
 
+    async function updatePlayersOnline() {
+        const response = await fetch(API_SERVER + "/api/servers/" + serverName + "/status/players", {
+            method: "GET",
+            headers: getAuthHeader()
+        });
+        const playersOnlineResponse = await response.json();
+        if (response.status == 200) {
+            setPlayerList(playersOnlineResponse["players"]);
+        } else if (response.status == 401) {
+            alert("You are not logged in.")
+        } else {
+            console.log("Error")
+        }
+    }
+
     async function startServer() {
         const response = await fetch(API_SERVER + "/api/servers/" + serverName + "/start", {
             method: "POST",
@@ -94,7 +110,6 @@ function Overview() {
             startServer();
         }
     }
-    
 
     // query status at intervals
     useEffect(() => {
@@ -104,6 +119,17 @@ function Overview() {
  
         return () => clearInterval(interval);
     }, [serverStatus, serverOperationalStatus]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (serverStatus) {
+                updatePlayersOnline();
+            } else {
+                setPlayerList([]);
+            }
+        }, 3500);
+        return () => clearInterval(interval);
+    }, [serverStatus, playerList]);
 
 
     // query status on load
@@ -178,6 +204,24 @@ function Overview() {
                     </button>
                     
                     {getStatusBadgeHTML()}
+                </div>
+
+                <div className={styles.card}>
+
+                    <h2>Players</h2>
+                    <p>{playerList.length === 0 ? "No players online" : `${playerList.length} players online`}</p>
+                    
+                    <div className={styles.playerList}>
+                        
+                        {playerList.length === 0 ? <h3 class={styles.noPlayers}><i className="fa-solid fa-users-slash"></i></h3> : ""}
+
+                        {playerList.map(player => (
+                            <div className={styles.playerElement}>
+                                <img class={styles.playerImg} src={`https://minotar.net/helm/${player}/100.png`} alt=""></img>
+                                <p>{player}</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </>

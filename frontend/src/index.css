@@ -1,0 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+:root {
+    --bg: rgb(14, 17, 16);
+    --light-bg: rgb(27, 31, 30);
+    --primary: #3CCD68;
+    --primary-dark: rgb(38, 126, 63);
+    --primary-light: #64e089;
+    --primary-bg: hsla(145, 92%, 51%, 0.1);
+    --secondary: rgb(39, 204, 182);
+    --white: #fff;
+    --gray: #929b92;
+    --black: #000000;
+
+    --glow-highlight: #0ff;
+
+    --error: hsl(3, 79%, 49%);
+    --error-bg: hsla(3, 75%, 62%, 0.14);
+    --error-text: hsl(3, 78%, 61%);
+
+    --warning: hsl(43, 100%, 48%);
+    --warning-bg: hsla(40, 100%, 50%, 0.2);
+    --warning-text: hsl(45, 100%, 60%);
+
+    --success: hsl(145, 72%, 30%);
+    --success-bg: hsla(145, 92%, 51%, 0.1);
+    --success-text: hsl(145, 85%, 46%);
+}
+
+body {
+    font-family: "Roboto", sans-serif;
+    margin: 0 !important;
+}
+
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--bg);
+    border-radius: 15px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-light); 
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+
+.notification {
+    padding: 16px;
+    margin: 10px;
+    border-radius: 15px;
+    top: 20px;
+    right: 20px;
+    width: calc(100% - 40px);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* transform: translateX(350px); */
+    /* transition: transform .5s ease-in-out; */
+    transition: transform 0.3s ease-out;
+    /* animation: immediateSlideAnimation 0.3s ease-out forwards; */
+  }
+
+  @keyframes immediateSlideAnimation {
+    0% {
+      transform: translateX(350px);
+    }
+    100% {
+      transform: translateX(0px);
+    }
+  }
+
+.notification.show {
+    transform: translateX(0); /* Slide in */
+    opacity: 1;
+}
+
+.notification.hide {
+    transform: translateX(350px); /* Slide out */
+    opacity: 0;
+}
+
+.notification.success {
+    background-color: var(--success-bg);
+    color: var(--success-text);
+}
+
+.notification.error {
+    background-color: var(--error-bg);
+    color: var(--error-text);
+}
+
+.notification.warning {
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.notification i {
+    scale: 1.4;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--white);
+}
+
+.notification-container {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 10px;
+    z-index: 100;
+}
+
+
+
+/* change notification background colors to not be transparent on mobile for easier readability */
+@media (max-width: 600px) {
+    .notification, .notification.success, .notification.error, .notification.warning, .notification.info {
+        background-color: #fff;
+        color: #000;
+    }
+
+    .notification.success {
+        background-color: var(--success);
+        color: var(--white);
+    }
+
+    .notification.error {
+        background-color: var(--error);
+        color: var(--white);
+    }
+
+    .notification.warning {
+        background-color: var(--warning);
+    }
+}

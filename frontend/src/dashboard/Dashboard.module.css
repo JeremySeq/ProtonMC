@@ -1,0 +1,148 @@
+
+.navbar {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: 10%;
+    background-color: var(--light-bg);
+    align-items: center;
+    justify-content: space-between;
+}
+
+.leftSide {
+    display: flex;
+}
+
+.navbarLinks {
+    margin-right: 30px;
+}
+
+.navbarLinks i {
+    scale: 1.5;
+    color: var(--white);
+}
+
+.openSidebarButton {
+    position: relative;
+    /* transform: scale(2); */
+    /* width: 25px;
+    height: 25px; */
+    background-color: transparent;
+    margin-left: 20px;
+    margin-right: 20px;
+    border: none;
+    border-radius: 2px;
+    color: var(--white);
+    z-index: 10;
+    padding: 20px;
+}
+
+.openSidebarButton i {
+    scale: 2;
+}
+
+.openSidebarButton:hover {
+    /* background-color: var(--bg); */
+    cursor: pointer;
+}
+
+.serverName {
+    color: var(--white);
+    font-weight: 500;
+    font-size: 20pt;
+    margin-right: 15px;
+}
+
+.pageName {
+    color: var(--gray);
+    font-weight: 500;
+    font-size: 20pt;
+    margin-right: 10px;
+}
+
+.sidebar {
+    position: absolute;
+    top: 0%;
+    left: -100%;
+    height: 100%;
+    min-width: 20%;
+    background-color: var(--light-bg);
+    display: flex;
+    flex-direction: column;
+
+    transition: left .3s;
+
+    z-index: 10;
+}
+
+.sidebarOpen {
+    left: 0%;
+}
+
+
+.links {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+
+    font-family: 'Roboto', Times, serif;
+    font-size: 18pt;
+    width: 100%;
+    height: 100%;
+    margin-right: 50px;
+}
+
+.links a {
+    padding-top: 15px;
+    padding-bottom: 15px;
+
+    color: var(--text);
+    text-decoration: none;
+
+    /* text-indent: 15px; */
+
+    transition: .1s linear;
+
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 10px;
+    width: 90%;
+    border-radius: 15px;
+}
+
+.links a i {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.links a:hover {
+    /* background-color: var(--bg); */
+    color: var(--primary);
+    /* border-left: solid 5px var(--secondary); */
+}
+
+.activeLink {
+    /* border-left: solid 5px var(--primary); */
+    /* outline: solid 2px var(--primary); */
+    color: var(--primary) !important;
+    background-color: var(--primary-bg);
+    /* background-image: linear-gradient(to right, var(--bg), var(--light-bg)); */
+}
+
+.content {
+    color: white;
+    position: absolute;
+    min-width: 100%;
+    min-height: 90%;
+}
+
+/* change notification background colors to not be transparent on mobile for easier readability */
+@media (max-width: 600px) {
+    .serverName {
+        display: none;
+    }
+    .pageName {
+        display: none;
+    }
+}

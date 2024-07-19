@@ -1,0 +1,5 @@
+servers.json
+users.json
+cache
+backend/__pycache__
+backend/.env

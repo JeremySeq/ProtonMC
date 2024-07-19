@@ -1,0 +1,67 @@
+.consoleContainer {
+    max-width: 1200px;
+    width: 100%;
+    border-radius: 15px;
+    background-color: var(--light-bg);
+    margin: 20px;
+    padding: 20px;
+    padding-top: 1px;
+}
+
+.consoleHeader {
+    font-size: 12pt;
+    color: var(--white);
+}
+
+.console {
+    background-color: var(--light-bg);
+    font-family: "Jetbrains Mono", monospace;
+    color: var(--white);
+    font-size: 10pt;
+    line-height: 1.5;
+    word-break: break-all;
+    text-wrap:wrap;
+    max-height: 600px;
+    height: 600px;
+    overflow-y: auto;
+    border-radius: 15px;
+    padding: 5px;
+}
+
+.console i {
+    font-style: normal;
+    color: var(--primary-light);
+}
+
+.consoleInput {
+    border: none;
+    font-family: "Jetbrains Mono", monospace;
+    outline: none;
+    background-color: var(--light-bg);
+    width: 100%;
+    color: var(--white);
+    font-size: 12pt;
+    padding: 5px;
+    margin-top: 10px;
+    /* text-indent: 5px; */
+}
+
+.consoleInput::placeholder {
+    color: var(--gray);
+}
+
+.commandGroup {
+    display: flex;
+    flex-direction: row;
+}
+
+.commandGroup label {
+    font-family: "Jetbrains Mono", monospace;
+    outline: none;
+    background-color: var(--light-bg);
+    color: var(--white);
+    font-size: 12pt;
+    padding: 5px;
+    margin-top: 10px;
+    margin-right: 5px;
+}

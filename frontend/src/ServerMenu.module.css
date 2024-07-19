@@ -1,0 +1,60 @@
+.serverTable {
+    position: absolute;
+    font-family: "Roboto", sans-serif;
+    font-size: 18pt;
+    width: 70%;
+    left: 50%;
+    transform: translateX(-50%);
+
+    /* border-collapse: collapse; */
+    border: none;
+    border-spacing: 10px;
+}
+
+.serverTable td i {
+    margin-right: 15px;
+    transform: scale(1.4);
+}
+
+.serverTable td, .serverTable th {
+    padding: 20px;
+    font-size: 14pt;
+    font-weight: 500;
+    border-radius: 15px;
+}
+
+.serverTable tr {
+    background-color: var(--light-bg);
+    transition: all 0.15s;
+    color: var(--gray);
+}
+
+.serverTable tr:hover {
+    background-color: var(--primary);
+    cursor: pointer;
+    color: var(--black);
+    transform: scale(1.025);
+    
+}
+
+.tableTop {
+    background-color: transparent !important;
+}
+
+.tableTop:hover {
+    cursor: default !important;
+    background-color: transparent !important;
+}
+
+.serverTable th {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: left;
+    background-color: transparent;
+    color: var(--white);
+}
+
+.pageTitle {
+    width: 100%;
+    text-align: center;
+}

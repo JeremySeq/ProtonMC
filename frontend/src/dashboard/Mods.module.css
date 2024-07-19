@@ -1,0 +1,21 @@
+.modsContainer {
+    margin: 20px;
+}
+
+.downloadModsButton {
+    border: none;
+    font-size: 16pt;
+    padding: 15px;
+    border-radius: 15px;
+    background-color: var(--primary);
+    transition: background-color 200ms;
+}
+
+.downloadModsButton:hover {
+    cursor: pointer;
+    background-color: var(--primary-dark);
+}
+
+.prepareDownload {
+    margin-top: 15px;
+}

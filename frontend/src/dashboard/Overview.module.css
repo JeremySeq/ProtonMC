@@ -1,0 +1,163 @@
+.container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    /* background-color: white; */
+    gap: 20px;
+    margin: 20px;
+    max-width: calc(100% - 40px);
+}
+
+.card {
+    max-width: 450px;
+    width: 100%;
+    height: max-content;
+    background-color: var(--lighter-background);
+    border-radius: 15px;
+    /* box-shadow: 0px 10px 5px rgba(0, 0, 0, 0.2); */
+    box-shadow: 0px 4px 1px rgb(0, 0, 0);
+    
+    outline: 1px solid rgba(59, 59, 59, 0.705);
+
+    /* background: linear-gradient(71deg, #050609, #17171c, #050509); */
+
+    /* background: linear-gradient(71deg, #050609, #17171c, #050509); */
+
+    background-color: var(--light-bg);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.spanCard {
+    max-width: 100% !important;
+    width: 100%;
+}
+
+.card h2 {
+    margin-top: 30px;
+    font-weight: 500;
+    font-size: 20pt;
+    text-align: center;
+    margin-bottom: 0px;
+}
+
+.card p {
+    margin-top: 10px;
+    color: var(--gray);
+    margin-bottom: 30px;
+}
+
+
+.statusButton {
+    /* position: relative; */
+    /* left: 50%; */
+    /* top: 0%; */
+    /* transform: translate(-50%, -50%); */
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 100%;
+    height: 100px;
+    width: 100px;
+    background-color: var(--primary);
+    outline: 2px solid var(--primary-light);
+    box-shadow:
+    inset 0 0 50px var(--primary),
+    inset 20px 0 80px var(--primary),
+    inset -20px 0 80px var(--glow-highlight),
+    inset 20px 0 300px var(--primary),
+    inset -20px 0 300px var(--glow-highlight),
+    0 0 35px var(--primary);
+    /* -10px 0 65px var(--primary),
+    10px 0 65px #0ff; */
+
+    transition: all .25s ease-in-out;
+}
+
+.statusButton:hover {
+    cursor: pointer;
+    transform: scale(1.1);
+
+    box-shadow:
+    inset 0 0 50px var(--primary),
+    inset 20px 0 80px var(--primary),
+    inset -20px 0 80px var(--glow-highlight),
+    inset 20px 0 300px var(--primary),
+    inset -20px 0 300px var(--glow-highlight),
+    0 0 35px var(--primary),
+    0px 0 65px var(--secondary);
+    /* 10px 0 65px #0ff; */
+}
+
+.statusButton:active {
+    transition: none;
+    background-color: var(--primary-dark);
+    box-shadow:
+    inset 0 0 50px var(--primary-dark),
+    inset 20px 0 80px var(--primary-dark),
+    inset -20px 0 80px var(--glow-highlight),
+    inset 20px 0 300px var(--primary-dark),
+    inset -20px 0 300px var(--glow-highlight),
+    0 0 35px var(--primary-dark),
+    0px 0 65px var(--secondary);
+}
+
+.statusButton i {
+    color: var(--white);
+    transform: scale(2.3);
+}
+
+.badge {
+    letter-spacing: .05em;
+    font-weight: 800;
+    /* top: 20%; */
+    font-size: 16pt;
+    padding: 10px;
+    margin-top: 30px;
+    padding-left: 40px;
+    padding-right: 40px;
+    width: fit-content;
+    background-color: var(--success-bg);
+    border-radius: 15px;
+    color: var(--success-text);
+    margin-bottom: 30px;
+}
+
+
+.badgeOn {
+    background-color: var(--success-bg);
+    color: var(--success-text);
+    outline: 1px solid var(--success-text);
+}
+
+.badgeOff {
+    background-color: var(--error-bg);
+    color: var(--error-text);
+    outline: 1px solid var(--error-text);
+}
+
+.badgeStarting {
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+    outline: 1px solid var(--warning-text);
+}
+
+.serverAddress {
+    font-family: "Jetbrains Mono", monospace;
+    font-size: 14pt !important;
+    word-wrap: break-word;
+    max-width: 80%;
+}
+
+.serverAddress:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.copyAddressButton:hover {
+    cursor: pointer;
+}

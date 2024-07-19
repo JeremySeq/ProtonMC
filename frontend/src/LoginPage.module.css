@@ -1,0 +1,102 @@
+body {
+    background-color: var(--bg);
+    color: var(--white);
+}
+
+.header {
+    position: absolute;
+    left: 50%;
+    margin-top: 20px;
+    transform: translateX(-50%);
+    font-family: "Roboto", sans-serif;
+    color: var(--gray);
+}
+
+.container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--light-bg);
+    min-width: 400px;
+    border-radius: 15px;
+    /* outline: 2px solid var(--primary); */
+}
+
+.form {
+    font-size: 18pt;
+    font-family: "Roboto", sans-serif;
+    letter-spacing: 1px;
+}
+
+.form h2 {
+    margin-top: 60px;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 24pt;
+}
+
+.inputGroup label {
+    display: none;
+}
+
+.inputGroup {
+    text-align: center;
+}
+
+.input {
+    letter-spacing: 1px;
+    margin-top: 20px;
+    font-size: 14pt;
+    width: 65%;
+    padding: 16px;
+    color: var(--white);
+    border: none;
+    background-color: var(--bg);
+    border-radius: 15px;
+}
+
+.input:hover {
+    outline: none;
+}
+
+.input:focus {
+    outline: 1px solid var(--gray);
+    border: none;
+}
+
+.button {
+    position: relative;
+    left: 50%;
+    font-family: "Ubuntu", sans-serif;
+    font-weight: 500;
+    font-style: normal;
+    padding: 16px;
+    margin-top: 30px;
+    margin-bottom: 60px;
+    font-size: 18pt;
+    width: 65%;
+    outline: none;
+    border: none;
+    border-radius: 15px;
+    background-color: var(--primary);
+    transition: all 100ms linear;
+    cursor: pointer;
+    color: var(--black);
+    transform: translateX(-50%);
+}
+
+.button i {
+    margin-left: 15px;
+}
+
+.button:hover {
+    box-shadow: 0 0.5em 0.5em -0.4em var(--primary);
+    transform: translateX(-50%) translateY(-0.25em);
+}
+
+.button:active {
+    box-shadow: 0 0.5em 0.5em -0.4em var(--primary-dark);
+    background-color: var(--primary-dark);
+    transform: translateX(-50%) translateY(-0.15em);
+}

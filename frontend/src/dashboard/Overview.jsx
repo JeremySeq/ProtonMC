@@ -137,6 +137,7 @@ function Overview() {
         queryStatus();
         updateServerStartTime();
         calculateServerUptime();
+        updatePlayersOnline();
     }, 
     []);
 

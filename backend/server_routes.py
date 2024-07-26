@@ -86,19 +86,25 @@ def stop_server(server):
         return jsonify({"message": True}), 200
     return jsonify({"message": False}), 200
 
-@server_routes.route('/<server>/console', methods=["GET", "POST"])
+@server_routes.route('/<server>/console', methods=["GET"])
 @token_required
 @requiresUserPermissionLevel(2)
 @check_server_exists
-def console(server):
-    """GET: returns console lines, POST: sends a console command"""
+def get_console(server):
+    """Returns console lines"""
     server = servers.getServerByName(server)
 
-    if request.method == "POST":
-        command = server.runCommand(request.form.get("command"))
-        return jsonify({"message": command}), 200
-
     return jsonify(server.console), 200
+
+@server_routes.route('/<server>/console', methods=["POST"])
+@token_required
+@requiresUserPermissionLevel(4)
+@check_server_exists
+def send_command(server):
+    """Sends a console command"""
+    server = servers.getServerByName(server)
+    command = server.runCommand(request.form.get("command"))
+    return jsonify({"message": command}), 200
 
 @server_routes.route('/<server>/backup', methods=["GET"])
 @token_required

@@ -88,7 +88,7 @@ def stop_server(server):
 
 @server_routes.route('/<server>/console', methods=["GET", "POST"])
 @token_required
-@requiresUserPermissionLevel(4)
+@requiresUserPermissionLevel(2)
 @check_server_exists
 def console(server):
     """GET: returns console lines, POST: sends a console command"""

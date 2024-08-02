@@ -88,6 +88,8 @@ function Console() {
             }
         } else if (response.status === 401) {
             alert("You are not logged in.");
+        } else if (response.status === 403) {
+            addNotification("You don't have permission to send commands.", "warning");
         } else {
             console.log("Error");
         }

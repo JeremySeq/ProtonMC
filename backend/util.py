@@ -3,11 +3,12 @@ import re
 IPV4_PATTERN = r'(?:\d{1,3}\.){3}\d{1,3}'
 
 PLAYER_LOG_PATTERN = r'(\S*)\[/' + IPV4_PATTERN + r':.{5}\]'
+PLAYER_JOIN_PATTERN = r'(\S*) joined the game'
 PLAYER_LEAVE_PATTERN = r'(\S*) left the game'
 
 def didPlayerJoin(line) -> bool:
     line = getTextAfterTags(line)
-    match = re.search(PLAYER_LOG_PATTERN, line)
+    match = re.search(PLAYER_JOIN_PATTERN, line)
     if match:
         return match.group(1)
     return None

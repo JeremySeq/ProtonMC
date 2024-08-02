@@ -108,12 +108,18 @@ class MCserver:
                     # convert size written to megabytes
                     size_written_mb = size_written / (1024 * 1024)
                     # update the progressbar
-                    bar.update(size_written_mb)
+                    try:
+                        bar.update(size_written_mb)
+                    except ValueError:
+                        print("Error updating progress bar. Size written exceeded expected value. Ignoring...")
 
                     self.backup_progress = bar.percentage
 
                     # Add file to the zip file
-                    zipf.write(file_path, os.path.relpath(file_path, folder_path))
+                    try:
+                        zipf.write(file_path, os.path.relpath(file_path, folder_path))
+                    except:
+                        print("Error writing file: " + file)
 
         bar.finish()
         self.backup_progress = 0

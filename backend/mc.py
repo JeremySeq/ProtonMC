@@ -373,7 +373,9 @@ class MCserver:
                                 self.players.append(didPlayerJoin(text_after_tags))
                                 print("PLAYER JOINED:", didPlayerJoin(text_after_tags))
                             if didPlayerLeave(text_after_tags):
-                                self.players.remove(didPlayerLeave(text_after_tags))
+                                if didPlayerLeave(text_after_tags) in self.players:
+                                    self.players.remove(didPlayerLeave(text_after_tags))
+                                    
                                 print("PLAYER LEFT:", didPlayerLeave(text_after_tags))
 
                         line = hideIPIfPlayerJoined(line)

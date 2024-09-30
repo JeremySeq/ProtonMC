@@ -73,6 +73,12 @@ def token_required(f):
         return f(*args, **kwargs)
     return decorated
 
+@loginRoutes.route("/", methods=["GET"])
+@token_required
+def getPermissionLevel():
+    user = getUserFromRequest(request)
+    return jsonify({"username": user.username, "permissions": user.permissions}), 200
+
 @loginRoutes.route("/", methods=["POST"])
 def loginUser():
     id = request.form.get('username')

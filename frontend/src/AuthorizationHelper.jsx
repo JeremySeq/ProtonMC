@@ -54,3 +54,23 @@ export async function isAuthenticated() {
   }
   return false;
 }
+
+export async function getUserPermissionLevel() {
+  var token = getCookie("Authorization");
+  
+  if (token) {
+    const response = await fetch(API_SERVER + "/api/login/", {
+        method: "GET",
+        headers: getAuthHeader()
+    });
+    const userInfo = await response.json();
+    if (response.status == 200) {
+        return userInfo["permissions"];
+    } else if (response.status == 401) {
+        return false;
+    } else {
+      console.log("Error code: " + response.status)
+      return false;
+    }
+  }
+}

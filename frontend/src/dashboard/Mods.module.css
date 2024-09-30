@@ -19,3 +19,194 @@
 .prepareDownload {
     margin-top: 15px;
 }
+
+.modList {
+    background-color: var(--light-bg);
+    min-height: 400px;
+    max-height: 400px;
+    margin-top: 15px;
+    padding: 5px;
+    color: var(--white);
+    overflow-y: scroll;
+    /* scrollbar-color: red yellow; */
+    font-family: "Roboto", sans-serif;
+    border-radius: 10px;
+    width: 500px;
+}
+
+.modListItem {
+    padding: 10px;
+    list-style: none;
+    border-radius: 10px;
+    transition: background-color 200ms, color 200ms;
+}
+
+.modManagerContainer {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.modSearchContainer {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    max-width: 800px;
+}
+
+.searchContainer {
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    align-items: end;
+}
+
+.searchBar {
+    width: 100%;
+    padding: 15px;
+    font-size: 16pt;
+    background-color: var(--light-bg);
+    color: var(--white);
+    border: none;
+    border-radius: 15px;
+    outline: none;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.searchButton {
+    position: absolute;
+    transform: scale(.8);
+    padding: 15px 20px;
+    font-size: 16pt;
+    background-color: var(--primary);
+    color: black;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all .1s linear;
+}
+
+.searchButton:hover {
+    background-color: var(--primary-dark);
+}
+
+.resultsContainer {
+    width: 100%;
+    margin: 20px auto;
+    margin-top: 15px;
+    background-color: var(--light-bg);
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-height: 500px;
+    overflow: auto;
+    padding-top: 10px;
+}
+
+.resultItem {
+    padding: 10px 0;
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+    margin-right: 10px;
+    transition: background-color 0.3s ease;
+    border-radius: 15px;
+    justify-content: space-between; /* Ensures space between content and button */
+}
+
+.resultItem div {
+    display: inline-block;
+    margin-left: 15px;
+    flex-grow: 1; /* Allows the mod details to take up the available space */
+}
+
+.resultItem:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.installButton {
+    padding: 10px 20px;
+    font-size: 14pt;
+    background-color: var(--primary);
+    color: black;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease, background-color .2s linear;
+    margin-right: 15px;
+}
+
+.installButton:hover {
+    background-color: var(--primary-dark);
+}
+
+.resultItem:hover .installButton {
+    opacity: 1;
+}
+
+.resultItem img {
+    margin-left: 10px;
+    width: 75px;
+}
+
+.resultItem div {
+    display: inline-block;
+    margin-left: 15px;
+}
+
+.resultItem h3 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--white);
+}
+
+.resultItem h3 i {
+    font-style: normal;
+    color: var(--gray);
+    font-size: 12pt;
+    font-weight: 500;
+}
+
+.resultItem p {
+    margin: 5px 0 0;
+    color: var(--gray);
+}
+
+.curseforgePlatform:before {
+    cursor: pointer;
+    color: rgb(241,105,60);
+    content: "Curseforge";
+}
+
+/* .curseforgePlatform:hover:after {
+    cursor: pointer;
+    color: rgb(27,217,106);
+    content: " < Modrinth";
+} */
+
+.modrinthPlatform:before {
+    cursor: pointer;
+    color: rgb(27,217,106);
+    content: "Modrinth";
+}
+
+/* .modrinthPlatform:hover:after {
+    cursor: pointer;
+    color: rgb(241,105,60);
+    content: " < Curseforge";
+} */
+
+@media (max-width: 600px) {
+    .modManagerContainer {
+        flex-direction: column;
+    }
+
+    .modSearchContainer {
+        width: calc(100% - 120px);
+    }
+
+    .modList {
+        max-width: calc(100% - 130px);
+    }
+}

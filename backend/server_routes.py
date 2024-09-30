@@ -2,7 +2,9 @@
 import os
 from flask import Blueprint, request, jsonify, send_from_directory
 import servers
+from server_types import ServerType
 from loginRoutes import token_required, requiresUserPermissionLevel
+import mod_helper
 
 server_routes = Blueprint('backups', __name__)
 
@@ -25,6 +27,19 @@ def get_servers():
     """Returns list of server names"""
     s = [server.name for server in servers.servers]
     return s, 200
+
+@server_routes.route('/', methods=["POST"])
+@token_required
+@requiresUserPermissionLevel(5)
+def create_server():
+    """Creates a new server."""
+    new_server_name = request.form.get("name")
+    new_server_type = request.form.get("type") if request.form.get("type") else ServerType.SPIGOT
+    print(f"Creating new server \"{new_server_name}\" with type {new_server_type}")
+    result = servers.createServer(new_server_name)
+    if not result:
+        return jsonify({"message": "Could not create server."}), 500
+    return jsonify({"message": "Server created successfully."}), 200
 
 @server_routes.route('/<server>/status', methods=["GET"])
 @token_required
@@ -145,3 +160,94 @@ def get_mods(server):
     server = servers.getServerByName(server)
     server.createModsZip()
     return send_from_directory(mod_zips_dir, server.name + ".zip")
+
+@server_routes.route('/<server>/mods/list', methods=["GET"])
+@check_server_exists
+def get_mods_list(server):
+    """Returns list of mod filenames and extracted mod names"""
+    server = servers.getServerByName(server)
+
+    return jsonify({"data": server.getModList()}), 200
+
+@server_routes.route('/<server>/mods/search', methods=["GET", "POST"])
+@check_server_exists
+def search_mod(server):
+    """Searches for mods compatible with the server"""
+    server = servers.getServerByName(server)
+    query = request.form.get("query")
+    platform = mod_helper.Platform.CURSEFORGE
+    if request.form.get("platform") is not None:
+        try:
+            platform = mod_helper.Platform[request.form.get("platform").upper()]
+        except KeyError:
+            pass
+    mod_loader = server.server_type.name.lower()
+    mods = None
+    if platform == mod_helper.Platform.CURSEFORGE:
+        mods = mod_helper.search_curseforge_mods(query, mod_loader=mod_loader, version=server.game_version)
+    else:
+        mods = mod_helper.search_modrinth_mods(query, mod_loader=mod_loader, version=server.game_version)
+
+    mods_json = []
+    for mod in mods:
+        mods_json.append(mod.to_json())
+
+    return jsonify({"data": mods_json}), 200
+
+@server_routes.route('/<server>/mods/install', methods=["POST"])
+@requiresUserPermissionLevel(4)
+@check_server_exists
+def install_mod(server):
+    """Installs a mod from Curseforge or Modrinth"""
+    server = servers.getServerByName(server)
+    platform = mod_helper.Platform.CURSEFORGE
+    if request.form.get("platform") is not None:
+        # check if it is an integer
+        flag = True
+        try:
+            int(request.form.get("platform"))
+        except ValueError:
+            flag = False
+        if flag:
+            if int(request.form.get("platform")) == 1:
+                platform = mod_helper.Platform.CURSEFORGE
+            else:
+                platform = mod_helper.Platform.MODRINTH
+        else:
+            try:
+                platform = mod_helper.Platform[request.form.get("platform").upper()]
+            except KeyError:
+                pass
+    project_id = request.form.get("project_id")
+    mods_folder = os.path.join(server.server_location, "mods")
+
+    result = None
+    if platform == mod_helper.Platform.CURSEFORGE:
+        result = mod_helper.download_curseforge_mod(
+            project_id, mods_folder,
+            server.server_type.name.lower(),
+            server.game_version if server.game_version else "")
+    else:
+        result = mod_helper.download_modrinth_mod(
+            project_id, mods_folder,
+            server.server_type.name.lower(),
+            server.game_version if server.game_version else "")
+
+    if result[1] is not 200:
+        return jsonify({"error": result[0]}), 500
+
+    return jsonify({"message": result[0]}), 200
+
+@server_routes.route('/<server>/mods/delete', methods=["POST"])
+@requiresUserPermissionLevel(4)
+@check_server_exists
+def delete_mod(server):
+    """Deletes a mod from the server."""
+    server = servers.getServerByName(server)
+    filename = request.form.get("filename")
+    path = os.path.join(server.server_location, "mods", filename)
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        return jsonify({"message": "File not found."}), 500
+    return jsonify({"filename": filename}), 200

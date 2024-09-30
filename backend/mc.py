@@ -9,10 +9,13 @@ import zipfile
 import time
 from util import *
 import progressbar
-
+from server_types import ServerType
+import extract_mod_info
 
 class MCserver:
-    def __init__(self, name, server_location, backup_location):
+    def __init__(self, name, server_type, server_location, backup_location, game_version=None):
+        self.server_type = server_type
+        self.game_version = game_version
         self.server_location = server_location
         self.backup_location = backup_location
         self.name = name
@@ -61,13 +64,13 @@ class MCserver:
         b = f'{self.backup_location}\\{month}-{day}-{year}_{hour}-{minute}'
         # os.mkdir(b)
 
-        self.zip_folder(a, self.backup_location, f"{month}-{day}-{year}_{hour}-{minute}.zip")
+        self.zip_folder_for_backup(a, self.backup_location, f"{month}-{day}-{year}_{hour}-{minute}.zip")
 
         # self.copy(a, b)
         print("Done backup.")
         self.backup_thread = None
 
-    def zip_folder(self, folder_path, zip_dest_folder, zip_filename):
+    def zip_folder_for_backup(self, folder_path, zip_dest_folder, zip_filename):
         # Create the full path for the zip file
         zip_file_path = os.path.join(zip_dest_folder, zip_filename)
 
@@ -388,3 +391,28 @@ class MCserver:
                 print("Thread did not terminate in time, forcefully terminating.")
             else:
                 print("Thread joined, server blocking method exiting.")
+
+    def isModded(self):
+        modded = [ServerType.FORGE, ServerType.NEOFORGE, ServerType.FABRIC]
+        if self.server_type in modded:
+            return True
+        return False
+
+    def getModList(self):
+        """Returns list of mods in the server's mods folder. 
+        [(file_name, mod_name), etc.] where file_name is the jarfile name,
+        and mod_name is the extracted mod name from the mod metadata"""
+
+        if not self.isModded():
+            return []
+        results = []
+        mods_folder = os.path.join(self.server_location, "mods")
+        for dirpath, dirnames, filenames in os.walk(mods_folder):
+            for file in filenames:
+                path = os.path.join(dirpath, *dirnames, file)
+                try:
+                    mod_name = extract_mod_info.get_mod_name(path)
+                except:
+                    print("Error while extracting mod metadata.")
+                results.append((file, mod_name))
+        return results

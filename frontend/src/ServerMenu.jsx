@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import styles from './ServerMenu.module.css';
-import {getAuthHeader} from './AuthorizationHelper.jsx';
+import {getAuthHeader, getUserPermissionLevel} from './AuthorizationHelper.jsx';
 import API_SERVER from './Constants.jsx'
 import { useNavigate } from "react-router-dom";
 
 function ServerMenu() {
 
     const [serverHTML, setServerHTML] = useState('');
+    const [createServerButton, setCreateServerButton] = useState(false);
     const navigate = useNavigate();
 
     function goToServer(serverName) {
@@ -38,8 +39,17 @@ function ServerMenu() {
 
     useEffect(() => {
         updateServers();
+        updateButton();
     }, []);
-    
+
+    async function updateButton() {
+        var permLevel = await getUserPermissionLevel();
+        if (permLevel >= 5) {
+            setCreateServerButton(true);
+        } else {
+            setCreateServerButton(false);
+        }
+    }
     
     return (
         <>
@@ -47,6 +57,7 @@ function ServerMenu() {
             <table className={styles.serverTable}>
                 {serverHTML}
             </table>
+            {createServerButton ? <button className={styles.addServerBtn}> + </button> : ""}
         </>
     )
 }

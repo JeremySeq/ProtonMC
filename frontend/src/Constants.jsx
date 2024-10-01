@@ -1,4 +1,3 @@
-
-const API_SERVER = "http://jeremyseq.serveminecraft.net:5000";
+const API_SERVER = import.meta.env.VITE_API_URL;
 
 export default API_SERVER;

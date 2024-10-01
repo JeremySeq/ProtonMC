@@ -1,0 +1,8 @@
+Flask==3.0.3
+Werkzeug==3.0.4
+Flask_Cors==4.0.1
+Flask_Login==0.6.3
+progressbar33==2.4
+psutil==5.9.4
+PyJWT==2.9.0
+python-dotenv==1.0.1

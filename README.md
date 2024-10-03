@@ -6,6 +6,21 @@ Built with Flask and React.
 
 ## Deployment
 
+
+### Minecraft Server Setup
+
+You should first make sure you have a Minecraft server set up.
+
+**You must have a `run.bat` file in your server folder**. This file will launch the server.
+
+Here's an example of a `run.bat` file for a Spigot server:
+```bat
+cd "C:\MinecraftServers\MyRandomServer\"
+java -Xmx4G -Xms4G -jar server.jar nogui
+```
+
+### ProtonMC setup
+
 You must have Python and Node.js installed.
 
 1. Download and extract the repository to a new folder.

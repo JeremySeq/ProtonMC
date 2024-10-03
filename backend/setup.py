@@ -14,6 +14,8 @@ def create_default_servers_json():
 
     json.dump({
         "My Spigot Server": {
+            "server_type": "SPIGOT",
+            "game_version": "1.21",
             "server_folder": "C:\\MinecraftServers\\My Spigot Server\\",
             "backup_folder": "C:\\MinecraftServers\\backups\\My Spigot Server\\"
         }

@@ -98,6 +98,23 @@ function Mods() {
             }
         });
     }
+
+    async function deleteMod(filename) {
+        var formData = new FormData();
+        formData.append("filename", filename);
+        fetch(API_SERVER + "/api/servers/" + serverName + "/mods/delete", { headers: getAuthHeader(), method: 'POST', body: formData})
+        .then(async res => {
+            var data = await res.json();
+            if (res.status == 200) {
+                updateModList();
+                addNotification("Deleted mod.", "success");
+            } else if (res.status == 500) {
+                var err = data["error"];
+                console.log(err);
+                addNotification(err, "error");
+            }
+        });
+    }
     
     function nFormatter(num, digits) {
         const lookup = [
@@ -122,7 +139,8 @@ function Mods() {
                     <ul className={styles.modList}>
                         {modList.map((modListItem) => (
                             <li key={modListItem[0]} className={styles.modListItem}>
-                                {modListItem[1]}
+                                <p>{modListItem[1]}</p>
+                                <button onClick={() => deleteMod(modListItem[0])}><i className="fa-solid fa-trash"></i></button>
                             </li>
                         ))}
                     </ul>

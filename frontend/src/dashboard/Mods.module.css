@@ -173,6 +173,31 @@
     color: var(--gray);
 }
 
+.modListItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* background-color: white; */
+}
+
+.modListItem p {
+    margin: 0px;
+}
+
+.modListItem button {
+    color: var(--error-text);
+    border: none;
+    background-color: var(--background);
+    justify-content: flex-end;
+    transition: color .2s linear;
+    scale: 1.3;
+}
+
+.modListItem button:hover {
+    color: var(--error);
+    cursor: pointer;
+}
+
 .curseforgePlatform:before {
     cursor: pointer;
     color: rgb(241,105,60);

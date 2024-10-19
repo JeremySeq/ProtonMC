@@ -6,3 +6,6 @@ progressbar33==2.4
 psutil==5.9.4
 PyJWT==2.9.0
 python-dotenv==1.0.1
+toml
+requests
+pick

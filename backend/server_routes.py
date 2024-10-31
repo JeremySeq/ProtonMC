@@ -5,6 +5,7 @@ import servers
 from server_types import ServerType
 from loginRoutes import token_required, requiresUserPermissionLevel
 import mod_helper
+from permissions import permissions
 
 server_routes = Blueprint('backups', __name__)
 
@@ -30,7 +31,7 @@ def get_servers():
 
 @server_routes.route('/', methods=["POST"])
 @token_required
-@requiresUserPermissionLevel(5)
+@requiresUserPermissionLevel(permissions["create_server"])
 def create_server():
     """Creates a new server."""
     new_server_name = request.form.get("name")
@@ -103,7 +104,7 @@ def stop_server(server):
 
 @server_routes.route('/<server>/console', methods=["GET"])
 @token_required
-@requiresUserPermissionLevel(2)
+@requiresUserPermissionLevel(permissions["view_console"])
 @check_server_exists
 def get_console(server):
     """Returns console lines"""
@@ -113,7 +114,7 @@ def get_console(server):
 
 @server_routes.route('/<server>/console', methods=["POST"])
 @token_required
-@requiresUserPermissionLevel(4)
+@requiresUserPermissionLevel(permissions["send_command"])
 @check_server_exists
 def send_command(server):
     """Sends a console command"""
@@ -132,7 +133,7 @@ def get_backups(server):
 
 @server_routes.route('/<server>/backup', methods=["POST"])
 @token_required
-@requiresUserPermissionLevel(2)
+@requiresUserPermissionLevel(permissions["create_backup"])
 @check_server_exists
 def create_backup(server):
     """Creates a backup."""
@@ -195,7 +196,7 @@ def search_mod(server):
     return jsonify({"data": mods_json}), 200
 
 @server_routes.route('/<server>/mods/install', methods=["POST"])
-@requiresUserPermissionLevel(4)
+@requiresUserPermissionLevel(permissions["install_mod"])
 @check_server_exists
 def install_mod(server):
     """Installs a mod from Curseforge or Modrinth"""
@@ -239,7 +240,7 @@ def install_mod(server):
     return jsonify({"message": result[0]}), 200
 
 @server_routes.route('/<server>/mods/delete', methods=["POST"])
-@requiresUserPermissionLevel(4)
+@requiresUserPermissionLevel(permissions["delete_mod"])
 @check_server_exists
 def delete_mod(server):
     """Deletes a mod from the server."""

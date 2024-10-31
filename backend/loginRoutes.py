@@ -9,6 +9,7 @@ from flask_login import (
     logout_user
 )
 from functools import wraps
+import permissions
 
 loginRoutes = Blueprint('login', __name__)
 
@@ -77,7 +78,7 @@ def token_required(f):
 @token_required
 def getPermissionLevel():
     user = getUserFromRequest(request)
-    return jsonify({"username": user.username, "permissions": user.permissions}), 200
+    return jsonify({"username": user.username, "permissions": user.permissions, "permission_set": permissions.permissions}), 200
 
 @loginRoutes.route("/", methods=["POST"])
 def loginUser():

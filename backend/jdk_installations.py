@@ -1,0 +1,58 @@
+import jdk
+import os
+
+jdk_path = os.path.join(os.path.abspath(os.getcwd()), ".jdk")
+if not os.path.exists(jdk_path):
+    os.makedirs(jdk_path)
+
+def get_jdk_installations():
+    """
+    Returns dictionary of installed JDK versions.
+    Keys are the major JDK version number,
+    and values are the paths to the JDK directories.
+    """
+    jdks = {}
+    for dirpath in os.listdir(jdk_path):
+        jdk_ver = dirpath.removeprefix('jdk')
+        jdk_ver = jdk_ver.split('.')[0]
+        jdks[jdk_ver] = os.path.join(jdk_path, dirpath)
+    return jdks
+
+def install_jdk_for_mc_version(mc_version):
+    """
+    Installs the JDK for the specified Minecraft version.
+    If the corresponding JDK is already installed, it will return the path.
+    If not, it will download the JDK and return the path.
+
+    Minecraft servers need specific versions of Java to run properly.
+    Also, the Spigot Buildtools require specific versions of Java to build.
+
+    https://www.spigotmc.org/wiki/buildtools/#prerequisites
+
+    Returns the installed JDK path.
+    """
+
+    
+
+    second_num = int(mc_version.split(".")[1])
+
+    version_needed = "21"
+    if second_num <= 15:
+        version_needed = "8"
+    elif second_num <= 17:
+        version_needed = "16"
+    elif second_num <= 20:
+        version_needed = "17"
+    
+    jdks = get_jdk_installations()
+
+    if version_needed in jdks:
+        print(f"JDK version {version_needed} found.")
+        return jdks[version_needed]
+
+    print(f"JDK version {version_needed} not found. Installing...")
+    return jdk.install(version_needed, vendor='Corretto', path=jdk_path)
+
+if __name__ == '__main__':
+    # print(get_jdk_installations())
+    print(install_jdk_for_mc_version("1.19.4"))

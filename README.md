@@ -4,6 +4,14 @@
 A website control panel for Minecraft servers.
 Built with Flask and React.
 
+Currently works only on Windows, but Linux is coming soon.
+
+Supports the following servers (although others may be possible):
+- Spigot
+- Forge
+- NeoForge
+- Fabric
+
 ## Deployment
 
 

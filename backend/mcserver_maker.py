@@ -159,7 +159,6 @@ def install_forge_server(server_folder, game_version):
     return True
 
 def install_neoforge_server(server_folder, game_version: str):
-    # TODO: Implement NeoForge server installation.
     download_url = f"https://maven.neoforged.net/releases/net/neoforged/neoforge/"
     
     response = requests.get(download_url)

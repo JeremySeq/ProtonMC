@@ -329,6 +329,9 @@ class MCserver:
         # set operational status as false in case it was true before
         self.is_operational = False
 
+        # TODO: Make this OS-independent
+        # Use run.bat or run.sh file (depending on the operating system)
+
         serverRunPath = self.server_location + "run.bat"
 
         self.subprocess = subprocess.Popen(

@@ -58,11 +58,13 @@ def setServerInfoToJson():
     with open(serversJson, 'w', encoding='utf-8') as json_file:
         json.dump(server_info, json_file, indent=4)
 
+# TODO
 def createServer(name):
-    server_folder = mcserver_maker.create_spigot_server(name)
+    game_version = "1.19.4"
+    server_folder = mcserver_maker.create_server(name, "J:\\MinecraftServers\\", ServerType.SPIGOT, game_version)
     if not server_folder:
         return None
-    servers.append(mc.MCserver(name, ServerType.SPIGOT, server_folder, os.path.join(os.getcwd(), f"backups\\{name}")))
+    servers.append(mc.MCserver(name, ServerType.SPIGOT, server_folder, os.path.join(os.getcwd(), f"backups\\{name}"), game_version=game_version))
     setServerInfoToJson()
     return getServerByName(name)
 

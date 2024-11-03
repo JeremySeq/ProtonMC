@@ -42,11 +42,12 @@ def build_spigot_jar(mc_version):
         return None
     
     jdk_path = jdk_installations.install_jdk_for_mc_version(mc_version)
+    jdk_path = os.path.join(jdk_path, "bin", "java")
 
     run_buildtools_proc = subprocess.Popen(
-        f"{jdk_path}/bin/java.exe -jar BuildTools.jar --rev {mc_version}", 
+        [jdk_path, "-jar", "BuildTools.jar", f"--rev", mc_version],
         cwd=buildtools_folder,
-        stdin=subprocess.PIPE, 
+        stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT
     )

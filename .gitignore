@@ -6,3 +6,4 @@ backend/.env
 .idea/
 venv/
 .jdk/
+.buildtools/

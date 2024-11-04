@@ -13,12 +13,12 @@ def create_default_servers_json():
     file = open(serversJson, "w", encoding="utf-8")
 
     json.dump({
-        "My Spigot Server": {
-            "server_type": "SPIGOT",
-            "game_version": "1.21",
-            "server_folder": "C:\\MinecraftServers\\My Spigot Server\\",
-            "backup_folder": "C:\\MinecraftServers\\backups\\My Spigot Server\\"
+        "servers_folder": os.path.join(os.getcwd(), "servers"),
+        "backups_folder": os.path.join(os.getcwd(), "backups"),
+        "servers_list": {
+            
         }
+        
     }, file, indent=4)
 
     file.close()

@@ -35,9 +35,16 @@ def get_servers():
 def create_server():
     """Creates a new server."""
     new_server_name = request.form.get("name")
-    new_server_type = request.form.get("type") if request.form.get("type") else ServerType.SPIGOT
-    print(f"Creating new server \"{new_server_name}\" with type {new_server_type}")
-    result = servers.createServer(new_server_name)
+    new_server_type = request.form.get("type") if request.form.get("type") else "spigot"
+    new_server_version = request.form.get("version")
+
+    try:
+        new_server_type = ServerType[new_server_type.upper()]
+    except KeyError:
+        return jsonify({"message": "Invalid server type."}, 200)
+
+    print(f"Creating new server \"{new_server_name}\" with type {new_server_type.name}")
+    result = servers.createServer(new_server_name, new_server_type, new_server_version)
     if not result:
         return jsonify({"message": "Could not create server."}), 500
     return jsonify({"message": "Server created successfully."}), 200

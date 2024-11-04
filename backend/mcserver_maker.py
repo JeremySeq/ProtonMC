@@ -265,6 +265,12 @@ def create_server(name, server_folder, server_type: ServerType, game_version):
         False if the server creation failed.
     """
 
+    # Create the parent server folder if it doesn't exist.
+    try:
+        os.mkdir(server_folder)
+    except FileExistsError:
+        pass
+
     server_folder = os.path.join(server_folder, name)
 
     try:

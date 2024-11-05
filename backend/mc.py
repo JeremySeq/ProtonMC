@@ -9,6 +9,7 @@ import zipfile
 import time
 from util import *
 import progressbar
+import platform
 from server_types import ServerType
 import extract_mod_info
 
@@ -329,17 +330,28 @@ class MCserver:
         # set operational status as false in case it was true before
         self.is_operational = False
 
-        # TODO: Make this OS-independent
+
         # Use run.bat or run.sh file (depending on the operating system)
+        system = platform.system()
+        # windows: run.bat
+        if system == "Windows":
+            serverRunPath = os.path.join(self.server_location, "run.bat")
 
-        serverRunPath = self.server_location + "run.bat"
+            self.subprocess = subprocess.Popen(
+                "\"" + serverRunPath + "\"", 
+                stdin=subprocess.PIPE, 
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT
+            )
+        else: # linux/mac: run.sh
+            serverRunPath = os.path.join(self.server_location, "run.sh")
 
-        self.subprocess = subprocess.Popen(
-            "\"" + serverRunPath + "\"", 
-            stdin=subprocess.PIPE, 
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
-        )
+            self.subprocess = subprocess.Popen(
+                ["source", "\"" + serverRunPath + "\""],
+                stdin=subprocess.PIPE, 
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT
+            )
 
         def server_read_lines(process, queue):
             while True:

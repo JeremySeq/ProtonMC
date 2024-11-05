@@ -32,7 +32,7 @@ def download_spigot_jar_using_getbukkit(version, destination_folder):
     response = requests.get(download_link)
 
     if response.status_code == 200:
-        with open(os.path.join(destination_folder, 'server.jar'), 'wb') as file:
+        with open(os.path.join(destination_folder, f"spigot-{version}"), 'wb') as file:
             file.write(response.content)
             print("Server jar successfully downloaded.")
     else:
@@ -98,7 +98,7 @@ def install_spigot_server(server_folder, game_version):
     # Get the JDK needed to run this server.
     jdk_path = jdk_installations.install_jdk_for_mc_version(game_version)
 
-    create_run_scripts(server_folder, jdk_path, "server.jar")
+    create_run_scripts(server_folder, jdk_path, f"spigot-{game_version}.jar")
 
     return True
 
@@ -142,8 +142,9 @@ def install_forge_server(server_folder, game_version):
     # install the installer jar
     jdk_path = jdk_installations.install_jdk_for_mc_version(game_version)
     jdk_path = os.path.join(jdk_path, "bin", "java")
+
     run_installer_proc = subprocess.Popen(
-        f"{jdk_path} -jar {filename} --installServer {server_folder}", 
+        [jdk_path, "-jar", filename, "--installServer", server_folder],
         cwd=server_folder,
         stdin=subprocess.PIPE, 
         stdout=subprocess.PIPE,

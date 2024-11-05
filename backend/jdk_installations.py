@@ -5,6 +5,20 @@ jdk_path = os.path.join(os.path.abspath(os.getcwd()), ".jdk")
 if not os.path.exists(jdk_path):
     os.makedirs(jdk_path)
 
+def extract_java_version(string: str):
+    ver = []
+    current_num = ""
+    for x in string:
+        if x.isdigit():
+            current_num += x
+        elif current_num != "":
+            ver.append(current_num)
+            current_num = ""
+    if ver[0] == "1":
+        return ver[1]
+    else:
+        return ver[0]
+
 def get_jdk_installations():
     """
     Returns dictionary of installed JDK versions.
@@ -13,8 +27,7 @@ def get_jdk_installations():
     """
     jdks = {}
     for dirpath in os.listdir(jdk_path):
-        jdk_ver = dirpath.removeprefix('jdk')
-        jdk_ver = jdk_ver.split('.')[0]
+        jdk_ver = extract_java_version(dirpath)
         jdks[jdk_ver] = os.path.join(jdk_path, dirpath)
     return jdks
 

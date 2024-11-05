@@ -347,7 +347,7 @@ class MCserver:
             serverRunPath = os.path.join(self.server_location, "run.sh")
 
             self.subprocess = subprocess.Popen(
-                ["source", "\"" + serverRunPath + "\""],
+                ["sh", serverRunPath],
                 stdin=subprocess.PIPE, 
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT

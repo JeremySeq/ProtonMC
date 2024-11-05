@@ -241,7 +241,7 @@ def install_mod(server):
             server.server_type.name.lower(),
             server.game_version if server.game_version else "")
 
-    if result[1] is not 200:
+    if result[1] != 200:
         return jsonify({"error": result[0]}), 500
 
     return jsonify({"message": result[0]}), 200

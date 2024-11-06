@@ -27,6 +27,8 @@ def initServers():
         os.mkdir(backups_folder)
     except FileExistsError:
         pass
+    except FileNotFoundError:
+        print("Could not find main backup folder.")
 
     server_list = data["servers_list"]
     server_info = []
@@ -39,11 +41,6 @@ def initServers():
             pass
         server_folder = server_data["server_folder"]
         backup_folder = server_data["backup_folder"]
-        # create backup folder for each server if necessary
-        try:
-            os.mkdir(backup_folder)
-        except FileExistsError:
-            pass
 
         game_version = None
         try:

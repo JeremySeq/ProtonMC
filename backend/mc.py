@@ -24,6 +24,8 @@ class MCserver:
             os.mkdir(self.backup_location)
         except FileExistsError:
             pass
+        except FileNotFoundError:
+            print(f"Could not find backup folder for server: {name}.")
         self.name = name
         self.console = []
         self.subprocess = None

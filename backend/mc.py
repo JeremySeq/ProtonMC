@@ -19,6 +19,11 @@ class MCserver:
         self.game_version = game_version
         self.server_location = server_location
         self.backup_location = backup_location
+        # create backup folder for server if necessary
+        try:
+            os.mkdir(self.backup_location)
+        except FileExistsError:
+            pass
         self.name = name
         self.console = []
         self.subprocess = None

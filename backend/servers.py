@@ -16,6 +16,18 @@ def initServers():
     # gets server info from json, puts it as mc.MCserver objects into servers list
     file = open(serversJson, 'r')
     data = json.load(file)
+
+    global servers_folder
+    servers_folder = data["servers_folder"]
+
+    global backups_folder
+    backups_folder = data["backups_folder"]
+    # create main backup folder if necessary
+    try:
+        os.mkdir(backups_folder)
+    except FileExistsError:
+        pass
+
     server_list = data["servers_list"]
     server_info = []
     for server_name in server_list:
@@ -27,6 +39,12 @@ def initServers():
             pass
         server_folder = server_data["server_folder"]
         backup_folder = server_data["backup_folder"]
+        # create backup folder for each server if necessary
+        try:
+            os.mkdir(backup_folder)
+        except FileExistsError:
+            pass
+
         game_version = None
         try:
             game_version = server_data["game_version"]
@@ -37,12 +55,6 @@ def initServers():
 
     global servers
     servers = server_info
-
-    global servers_folder
-    servers_folder = data["servers_folder"]
-
-    global backups_folder
-    backups_folder = data["backups_folder"]
 
 def getServerByName(name):
     for server in servers:

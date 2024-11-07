@@ -345,7 +345,7 @@ class MCserver:
             serverRunPath = os.path.join(self.server_location, "run.bat")
 
             self.subprocess = subprocess.Popen(
-                "\"" + serverRunPath + "\"", 
+                [serverRunPath, "nogui"],
                 cwd=self.server_location,
                 stdin=subprocess.PIPE, 
                 stdout=subprocess.PIPE,
@@ -355,7 +355,7 @@ class MCserver:
             serverRunPath = os.path.join(self.server_location, "run.sh")
 
             self.subprocess = subprocess.Popen(
-                ["sh", serverRunPath],
+                ["sh", serverRunPath, "nogui"],
                 cwd=self.server_location,
                 stdin=subprocess.PIPE, 
                 stdout=subprocess.PIPE,

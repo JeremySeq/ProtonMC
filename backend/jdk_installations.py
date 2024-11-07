@@ -31,7 +31,7 @@ def get_jdk_installations():
         jdks[jdk_ver] = os.path.join(jdk_path, dirpath)
     return jdks
 
-def install_jdk_for_mc_version(mc_version):
+def install_jdk_for_mc_version(mc_version=None):
     """
     Installs the JDK for the specified Minecraft version.
     If the corresponding JDK is already installed, it will return the path.
@@ -46,25 +46,33 @@ def install_jdk_for_mc_version(mc_version):
     """
 
     
+    if mc_version is not None:
+        second_num = int(mc_version.split(".")[1])
+        third_num = 0
+        if (len(mc_version.split(".")) > 2):
+            third_num = int(mc_version.split(".")[2])
 
-    second_num = int(mc_version.split(".")[1])
+        version_needed = "21"
+        if second_num <= 15:
+            version_needed = "8"
+        elif second_num <= 17:
+            version_needed = "16"
+        elif second_num <= 20:
+            if (second_num == 20 and third_num >= 5):
+                version_needed = "21"
+            else:
+                version_needed = "17"
+        
+        jdks = get_jdk_installations()
 
-    version_needed = "21"
-    if second_num <= 15:
-        version_needed = "8"
-    elif second_num <= 17:
-        version_needed = "16"
-    elif second_num <= 20:
-        version_needed = "17"
-    
-    jdks = get_jdk_installations()
+        if version_needed in jdks:
+            print(f"JDK version {version_needed} found.")
+            return jdks[version_needed]
 
-    if version_needed in jdks:
-        print(f"JDK version {version_needed} found.")
-        return jdks[version_needed]
-
-    print(f"JDK version {version_needed} not found. Installing...")
-    return jdk.install(version_needed, vendor='Corretto', path=jdk_path)
+        print(f"JDK version {version_needed} not found. Installing...")
+        return jdk.install(version_needed, vendor='Corretto', path=jdk_path)
+    else:
+        return jdk.install("latest", vendor='Corretto', path=jdk_path)
 
 if __name__ == '__main__':
     # print(get_jdk_installations())

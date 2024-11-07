@@ -346,6 +346,7 @@ class MCserver:
 
             self.subprocess = subprocess.Popen(
                 "\"" + serverRunPath + "\"", 
+                cwd=self.server_location,
                 stdin=subprocess.PIPE, 
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT
@@ -355,6 +356,7 @@ class MCserver:
 
             self.subprocess = subprocess.Popen(
                 ["sh", serverRunPath],
+                cwd=self.server_location,
                 stdin=subprocess.PIPE, 
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT

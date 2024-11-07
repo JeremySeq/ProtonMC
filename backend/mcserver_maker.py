@@ -64,7 +64,6 @@ def create_run_scripts(server_folder, jdk_path, jar_file, java_gb=4):
     java_gb = 4
     with open(os.path.join(server_folder, 'run.bat'), 'w', encoding="utf-8") as run_file:
         run_lines = [
-            "cd /d \"%~dp0\"",
             f"\"{jdk_path}/bin/java.exe\" -Xmx{java_gb}G -Xms{java_gb}G -jar {jar_file} nogui"
         ]
         run_file.write("\n".join(run_lines))
@@ -73,7 +72,6 @@ def create_run_scripts(server_folder, jdk_path, jar_file, java_gb=4):
     # TODO: test this .sh file on Linux.
     with open(os.path.join(server_folder, 'run.sh'), 'w', encoding="utf-8") as run_file:
         run_lines = [
-            f"cd \"{server_folder}\"",
             f"\"{jdk_path}/bin/java\" -Xmx{java_gb}G -Xms{java_gb}G -jar {jar_file} nogui"
         ]
         run_file.write("\n".join(run_lines))

@@ -79,6 +79,51 @@ def create_run_scripts(server_folder, jdk_path, jar_file, java_gb=4):
     # Make the script executable
     os.chmod(os.path.join(server_folder, 'run.sh'), 0o755)
 
+
+def edit_forge_run_scripts(server_folder, jdk_path):
+    """
+    Edits the run.sh and run.bat files to replace the Java command with the given JDK path.
+    """
+
+    file_path = os.path.join(server_folder, 'run.sh')
+
+    java_path = os.path.join(jdk_path, "bin", "java")
+    try:
+        # Read the original file content
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+
+        # Find and replace the line that starts with "java"
+        with open(file_path, 'w') as file:
+            for line in lines:
+                if line.strip().startswith("java"):
+                    line = line.replace("java", java_path, 1)
+                file.write(line)
+        print("Java path replacement complete for run.sh.")
+    except FileNotFoundError:
+        print(f"File not found: {file_path}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    file_path = os.path.join(server_folder, 'run.bat')
+    try:
+        # Read the original file content
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+
+        # Find and replace the line that starts with "java"
+        with open(file_path, 'w') as file:
+            for line in lines:
+                if line.strip().startswith("java"):
+                    line = line.replace("java", java_path, 1)
+                file.write(line)
+        print("Java path replacement complete for run.bat.")
+    except FileNotFoundError:
+        print(f"File not found: {file_path}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    return
+
 def install_spigot_server(server_folder, game_version):
     """
     Installs a Spigot server using BuildTools and creates run.bat and run.sh files.
@@ -139,10 +184,10 @@ def install_forge_server(server_folder, game_version):
     
     # install the installer jar
     jdk_path = jdk_installations.install_jdk_for_mc_version(game_version)
-    jdk_path = os.path.join(jdk_path, "bin", "java")
+    java_path = os.path.join(jdk_path, "bin", "java")
 
     run_installer_proc = subprocess.Popen(
-        [jdk_path, "-jar", filename, "--installServer", server_folder],
+        [java_path, "-jar", filename, "--installServer", server_folder],
         cwd=server_folder,
         stdin=subprocess.PIPE, 
         stdout=subprocess.PIPE,
@@ -154,6 +199,8 @@ def install_forge_server(server_folder, game_version):
         line = line.strip()
         if line != "":
             print(line.decode('utf-8'))
+
+    edit_forge_run_scripts(server_folder, jdk_path)
 
     return True
 
@@ -203,9 +250,9 @@ def install_neoforge_server(server_folder, game_version: str):
 
     # install the installer jar
     jdk_path = jdk_installations.install_jdk_for_mc_version(game_version)
-    jdk_path = os.path.join(jdk_path, "bin", "java")
+    java_path = os.path.join(jdk_path, "bin", "java")
     run_installer_proc = subprocess.Popen(
-        f"{jdk_path} -jar {filename} --installServer {server_folder}", 
+        f"{java_path} -jar {filename} --installServer {server_folder}", 
         cwd=server_folder,
         stdin=subprocess.PIPE, 
         stdout=subprocess.PIPE,
@@ -217,6 +264,8 @@ def install_neoforge_server(server_folder, game_version: str):
         line = line.strip()
         if line != "":
             print(line.decode('utf-8'))
+
+    edit_forge_run_scripts(server_folder, jdk_path)
 
     return True
 

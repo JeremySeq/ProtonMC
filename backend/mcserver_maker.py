@@ -2,11 +2,15 @@ import requests
 import os
 import shutil
 import subprocess
+import re
 from bs4 import BeautifulSoup
 import spigot_buildtools
 import jdk_installations
 from server_types import ServerType
 
+
+MC_VERSION_PATTERN = r"^1\.(\d{1,2})(\.\d+)?$"
+MC_VERSION_PATTERN_2 = r"^1\.(\d{1,2})(\.\d+)?(-pre\d+)?$"  # includes pre-release versions
 
 def build_spigot_jar(game_version, destination_folder):
     """
@@ -346,6 +350,100 @@ def create_server(name, server_folder, server_type: ServerType, game_version):
     
     return server_folder
 
+
+def get_spigot_versions_available() -> list[str]:
+    url = f"https://hub.spigotmc.org/versions/"
+    
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        directory_elements = soup.find_all("a")
+
+        versions = []
+        for element in directory_elements:
+            text = element.text.removesuffix(".json")
+            if re.fullmatch(MC_VERSION_PATTERN, text):
+                versions.append(text)
+        return versions
+    except requests.RequestException as e:
+        print(f"Error: {e}")
+        return []
+
+def get_forge_versions_available() -> list[str]:
+    url = "https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json"
+    
+    try:
+        response = requests.get(url)
+        data = response.json()
+        version_dict = data["promos"]
+        forge_versions = list(version_dict.keys())
+
+        versions = [x.removesuffix("-recommended").removesuffix("-latest") for x in forge_versions]
+        versions = set(versions)
+
+        return versions
+    except requests.RequestException as e:
+        print(f"Error: {e}")
+        return []
+    
+def get_neoforge_versions_available() -> list[str]:
+    url = f"https://maven.neoforged.net/releases/net/neoforged/neoforge/"
+    
+    try:
+        response = requests.get(url)
+
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        directory_elements = soup.find_all(class_="directory")
+
+        versions = []
+        for element in directory_elements:
+            text = element.text.removesuffix("/")
+            split = text.split(".")
+            text = "1." + split[0] + "." + split[1]
+            if text not in versions:
+                versions.append(text)
+
+        return versions
+    except requests.RequestException as e:
+        print(f"Error: {e}")
+        return []
+
+def get_fabric_versions_available() -> list[str]:
+    url = f"https://meta.fabricmc.net/v2/versions"
+    
+    try:
+        response = requests.get(url)
+        data = response.json()
+        data = data["game"]
+        fabric_versions = [x["version"] for x in data]
+        
+        versions = []
+        for version in fabric_versions:
+            if re.fullmatch(MC_VERSION_PATTERN, version):
+                versions.append(version)
+
+        return versions
+    except requests.RequestException as e:
+        print(f"Error: {e}")
+        return []
+
+def get_versions_available(server_type: ServerType):
+    """
+    Returns a list of available versions for the specified server type.
+    """
+
+    if server_type == ServerType.SPIGOT:
+        return get_spigot_versions_available()
+    elif server_type == ServerType.FORGE:
+        return get_forge_versions_available()
+    elif server_type == ServerType.NEOFORGE:
+        return get_neoforge_versions_available()
+    elif server_type == ServerType.FABRIC:
+        return get_fabric_versions_available()
+    
+    return []
 
 if __name__ == "__main__":
     create_server("some_random_server", "J:\\MinecraftServers\\", ServerType.NEOFORGE, "1.20.6")

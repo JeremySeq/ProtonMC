@@ -69,7 +69,6 @@ def create_run_scripts(server_folder, jdk_path, jar_file, java_gb=4):
         run_file.write("\n".join(run_lines))
 
     # For Linux, create a run.sh file.
-    # TODO: test this .sh file on Linux.
     with open(os.path.join(server_folder, 'run.sh'), 'w', encoding="utf-8") as run_file:
         run_lines = [
             f"\"{jdk_path}/bin/java\" -Xmx{java_gb}G -Xms{java_gb}G -jar {jar_file} nogui"

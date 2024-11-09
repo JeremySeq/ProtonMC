@@ -252,7 +252,7 @@ def install_neoforge_server(server_folder, game_version: str):
     jdk_path = jdk_installations.install_jdk_for_mc_version(game_version)
     java_path = os.path.join(jdk_path, "bin", "java")
     run_installer_proc = subprocess.Popen(
-        f"{java_path} -jar {filename} --installServer {server_folder}", 
+        [java_path, "-jar", filename, "--installServer", server_folder],
         cwd=server_folder,
         stdin=subprocess.PIPE, 
         stdout=subprocess.PIPE,

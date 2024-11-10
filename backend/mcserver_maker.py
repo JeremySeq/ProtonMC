@@ -86,6 +86,7 @@ def create_run_scripts(server_folder, jdk_path, jar_file, java_gb=4):
 def edit_forge_run_scripts(server_folder, jdk_path):
     """
     Edits the run.sh and run.bat files to replace the Java command with the given JDK path.
+    Also removes the "pause" command from the run.bat
     """
 
     file_path = os.path.join(server_folder, 'run.sh')
@@ -119,6 +120,8 @@ def edit_forge_run_scripts(server_folder, jdk_path):
             for line in lines:
                 if line.strip().startswith("java"):
                     line = line.replace("java", java_path, 1)
+                if line.strip().startswith("pause"):
+                    line = ""
                 file.write(line)
         print("Java path replacement complete for run.bat.")
     except FileNotFoundError:
@@ -380,7 +383,10 @@ def get_forge_versions_available() -> list[str]:
         forge_versions = list(version_dict.keys())
 
         versions = [x.removesuffix("-recommended").removesuffix("-latest") for x in forge_versions]
-        versions = set(versions)
+
+        versions = [version for version in versions if re.fullmatch(MC_VERSION_PATTERN, version)]
+
+        versions = list(set(versions))
 
         return versions
     except requests.RequestException as e:
@@ -429,20 +435,27 @@ def get_fabric_versions_available() -> list[str]:
         print(f"Error: {e}")
         return []
 
+def sort_minecraft_versions(versions):
+    """
+    Sorts the list of Minecraft versions in descending order based on their version numbers.
+    """
+    version_tuples = [tuple(map(int, v.split('.'))) for v in versions]
+    sorted_versions = sorted(version_tuples, reverse=True)
+    return ['.'.join(map(str, v)) for v in sorted_versions]
+
 def get_versions_available(server_type: ServerType):
     """
     Returns a list of available versions for the specified server type.
     """
 
     if server_type == ServerType.SPIGOT:
-        return get_spigot_versions_available()
+        return sort_minecraft_versions(get_spigot_versions_available())
     elif server_type == ServerType.FORGE:
-        return get_forge_versions_available()
+        return sort_minecraft_versions(get_forge_versions_available())
     elif server_type == ServerType.NEOFORGE:
-        return get_neoforge_versions_available()
+        return sort_minecraft_versions(get_neoforge_versions_available())
     elif server_type == ServerType.FABRIC:
-        return get_fabric_versions_available()
-    
+        return sort_minecraft_versions(get_fabric_versions_available())
     return []
 
 if __name__ == "__main__":

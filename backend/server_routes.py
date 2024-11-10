@@ -49,10 +49,24 @@ def create_server():
 
     print(f"Creating new server \"{new_server_name}\" with type {new_server_type.name}")
 
-    servers.createServerThreaded(new_server_name, new_server_type, new_server_version)
+    servers.asyncCreateServer(new_server_name, new_server_type, new_server_version)
     return jsonify({"message": "Creating server..."}), 200
 
-@server_routes.route('/game_versions', methods=["GET"])  # TODO: move all the create server stuff to a different api route (not the server_routes)
+@server_routes.route('/', methods=["DELETE"])
+@token_required
+@requiresUserPermissionLevel(permissions["create_server"])
+def delete_server():
+    """Deletes a server"""
+    server_name = request.form.get("name")
+    server = servers.getServerByName(server_name)
+    if server is None:
+        return jsonify({"message": "Server does not exist"}), 404
+    servers.asyncDeleteServer(server_name)
+    return jsonify({"message": "Deleting server..."}), 200
+
+# TODO: move all the create server stuff to a different api route (not the server_routes)
+# or better yet, make server names not able to use underscores.
+@server_routes.route('/game_versions', methods=["GET"])
 @token_required
 @requiresUserPermissionLevel(permissions["create_server"])
 def get_available_game_versions():

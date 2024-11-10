@@ -7,6 +7,7 @@ import subprocess
 from threading import Thread
 import zipfile
 import time
+import threading
 from enum import Enum
 from util import *
 import progressbar
@@ -43,8 +44,23 @@ class MCserver:
         self.is_operational = False
         self.players = []
 
+        # self.async_create_backup_directory()
+
     def __str__(self):
         return self.name
+    
+    def async_create_backup_directory(self):
+        def try_mkdir():
+            try:
+                os.mkdir(self.backup_location)
+            except FileExistsError:
+                pass
+            except FileNotFoundError:
+                print(f"Could not find backup folder for server: {self.name}.")
+        
+        thread = threading.Thread(target=try_mkdir)
+        thread.daemon = True
+        thread.start()
 
     def stop(self):
         self.runCommand("stop")

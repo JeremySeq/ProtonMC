@@ -2,6 +2,7 @@ import os
 from enum import Enum
 import json
 from threading import Thread
+import shutil
 import mc
 import mcserver_maker
 from server_types import ServerType
@@ -91,20 +92,42 @@ def setServerInfoToJson():
     with open(serversJson, 'w', encoding='utf-8') as json_file:
         json.dump(server_info, json_file, indent=4)
 
-def createServer(name, server_type: ServerType, game_version: str):
-    server_folder = mcserver_maker.create_server(name, servers_folder, server_type, game_version)
-    server_creation_threads.pop(name)
-    if not server_folder:
-        return None
-    servers.append(mc.MCserver(name, server_type, server_folder, os.path.join(backups_folder, name), game_version=game_version))
-    setServerInfoToJson()
-    return getServerByName(name)
-
-def createServerThreaded(name, server_type: ServerType, game_version: str):
+def asyncCreateServer(name, server_type: ServerType, game_version: str):
+    def createServer(name, server_type: ServerType, game_version: str):
+        server_folder = mcserver_maker.create_server(name, servers_folder, server_type, game_version)
+        server_creation_threads.pop(name)
+        if not server_folder:
+            return None
+        servers.append(mc.MCserver(name, server_type, server_folder, os.path.join(backups_folder, name), game_version=game_version))
+        setServerInfoToJson()
+        return getServerByName(name)
     creation_thread = Thread(target=createServer, args=(name, server_type, game_version))
     creation_thread.start()
     server_creation_threads[name] = creation_thread
 
+def asyncDeleteServer(name):
+    print(f"Deleting server {name}...")
+    result = [None]
+    def asyncDeleteServer():
+        server = getServerByName(name)
+        if server is None:
+            result[0] = None
+            return None
+        try:
+            server_creation_threads.pop(name)
+        except KeyError:
+            pass
+        server_folder = server.server_location
+        shutil.rmtree(server_folder)
+        servers.remove("some random thing")
+        setServerInfoToJson()
+        print(f"Server \"{name}\" deleted successfully.")
+        result[0] = True
+        return True
+    
+    thread = Thread(target=asyncDeleteServer)
+    thread.start()
+
 if __name__ == '__main__':
     initServers()
-    createServer("test2", ServerType.SPIGOT, "1.20.1")
+    # createServer("test2", ServerType.SPIGOT, "1.20.1")

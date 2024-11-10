@@ -27,10 +27,18 @@ function ServerMenu() {
             const listItems = serverList.map(server => {
                     if (server["status"] === 3) {
                         return <tr className={styles.inaccessibleServer}>
+                            <td><i className="fa-solid fa-server"></i>{server["name"]} - Creating...</td>
+                        </tr>
+                    } else if (server["status"] === 2) {
+                        return <tr className={styles.runningServer} onClick={() => goToServer(server["name"])}>
+                            <td><i className="fa-solid fa-server"></i>{server["name"]}</td>
+                        </tr>
+                    } else if (server["status"] === 1) {
+                        return <tr className={styles.startingServer} onClick={() => goToServer(server["name"])}>
                             <td><i className="fa-solid fa-server"></i>{server["name"]}</td>
                         </tr>
                     }
-                    return <tr onClick={() => goToServer(server["name"])}>
+                    return <tr className={styles.stoppedServer} onClick={() => goToServer(server["name"])}>
                         <td><i className="fa-solid fa-server"></i>{server["name"]}</td>
                     </tr>
                 }
@@ -43,6 +51,14 @@ function ServerMenu() {
             console.log("Error")
         }
     };
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            updateServers();
+        }, 2500);
+
+        return () => clearInterval(interval);
+    }, []);
 
     useEffect(() => {
         updateServers();

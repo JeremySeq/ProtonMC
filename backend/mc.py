@@ -7,6 +7,7 @@ import subprocess
 from threading import Thread
 import zipfile
 import time
+from enum import Enum
 from util import *
 import progressbar
 import platform
@@ -14,6 +15,13 @@ from server_types import ServerType
 import extract_mod_info
 
 class MCserver:
+
+    class ServerStatus(Enum):
+        STOPPED = 0
+        STARTING = 1
+        RUNNING = 2
+        CREATING = 3
+
     def __init__(self, name, server_type, server_location, backup_location, game_version=None):
         self.server_type = server_type
         self.game_version = game_version
@@ -298,6 +306,19 @@ class MCserver:
                     return True
             return False
         return False
+    
+    def getServerStatus(self):
+        running = self.isServerRunning()
+        operational = self.isServerOperational()
+        
+        if not running:
+            return MCserver.ServerStatus.STOPPED
+        
+        if not operational:
+            return MCserver.ServerStatus.STARTING
+        
+        return MCserver.ServerStatus.RUNNING
+
     
     def getStartTime(self):
         if not self.isServerRunning():

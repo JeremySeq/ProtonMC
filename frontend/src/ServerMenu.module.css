@@ -34,8 +34,21 @@
     cursor: pointer;
     color: var(--black);
     transform: scale(1.025);
-    
 }
+
+.inaccessibleServer {
+    background-color: var(--warning-bg) !important;
+    transition: all 0.15s;
+    color: var(--warning-text) !important;
+}
+
+.inaccessibleServer:hover {
+    background-color: var(--warning-bg) !important;
+    cursor: default !important;
+    color: var(--warning-text) !important;
+    transform: scale(1) !important;
+}
+
 
 .tableTop {
     background-color: transparent !important;

@@ -1,6 +1,7 @@
 import os
 from enum import Enum
 import json
+from threading import Thread
 import mc
 import mcserver_maker
 from server_types import ServerType
@@ -9,6 +10,8 @@ serversJson = "servers.json"
 
 # data from the servers.json file
 servers = []
+server_creation_threads = {}
+
 servers_folder = None
 backups_folder = None
 
@@ -90,11 +93,17 @@ def setServerInfoToJson():
 
 def createServer(name, server_type: ServerType, game_version: str):
     server_folder = mcserver_maker.create_server(name, servers_folder, server_type, game_version)
+    server_creation_threads.pop(name)
     if not server_folder:
         return None
     servers.append(mc.MCserver(name, server_type, server_folder, os.path.join(backups_folder, name), game_version=game_version))
     setServerInfoToJson()
     return getServerByName(name)
+
+def createServerThreaded(name, server_type: ServerType, game_version: str):
+    creation_thread = Thread(target=createServer, args=(name, server_type, game_version))
+    creation_thread.start()
+    server_creation_threads[name] = creation_thread
 
 if __name__ == '__main__':
     initServers()

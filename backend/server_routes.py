@@ -6,6 +6,8 @@ from server_types import ServerType
 from loginRoutes import token_required, requiresUserPermissionLevel
 import mod_helper
 from permissions import permissions
+import mcserver_maker
+from mc import MCserver
 
 server_routes = Blueprint('backups', __name__)
 
@@ -25,9 +27,11 @@ def check_server_exists(func):
 @server_routes.route('/')
 @token_required
 def get_servers():
-    """Returns list of server names"""
-    s = [server.name for server in servers.servers]
-    return s, 200
+    """Returns list of servers and their statuses"""
+    s = [{"name": server.name, "status": server.getServerStatus().value} for server in servers.servers]
+    for server_creating in servers.server_creation_threads.keys():
+        s.append({"name": server_creating, "status": MCserver.ServerStatus.CREATING.value})
+    return jsonify(s), 200
 
 @server_routes.route('/', methods=["POST"])
 @token_required
@@ -41,13 +45,29 @@ def create_server():
     try:
         new_server_type = ServerType[new_server_type.upper()]
     except KeyError:
-        return jsonify({"message": "Invalid server type."}, 200)
+        return jsonify({"message": "Invalid server type."}, 400)
 
     print(f"Creating new server \"{new_server_name}\" with type {new_server_type.name}")
-    result = servers.createServer(new_server_name, new_server_type, new_server_version)
-    if not result:
-        return jsonify({"message": "Could not create server."}), 500
-    return jsonify({"message": "Server created successfully."}), 200
+
+    servers.createServerThreaded(new_server_name, new_server_type, new_server_version)
+    return jsonify({"message": "Creating server..."}), 200
+
+@server_routes.route('/game_versions', methods=["GET"])  # TODO: move all the create server stuff to a different api route (not the server_routes)
+@token_required
+@requiresUserPermissionLevel(permissions["create_server"])
+def get_available_game_versions():
+    """
+    Returns a list of available game versions for a specified server type.
+    """
+
+    new_server_type = request.args.get("type") if request.args.get("type") else "spigot"
+    try:
+        new_server_type = ServerType[new_server_type.upper()]
+    except KeyError:
+        return jsonify({"message": "Invalid server type."}, 200)
+
+    versions = mcserver_maker.get_versions_available(new_server_type)
+    return jsonify({"message": versions}), 200
 
 @server_routes.route('/<server>/status', methods=["GET"])
 @token_required

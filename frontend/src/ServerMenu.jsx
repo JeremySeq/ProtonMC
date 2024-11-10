@@ -5,6 +5,7 @@ import styles from './ServerMenu.module.css';
 import {getAuthHeader, getUserPermissionLevel} from './AuthorizationHelper.jsx';
 import API_SERVER from './Constants.jsx'
 import { useNavigate } from "react-router-dom";
+import ServerCreator from "./ServerCreator.jsx";
 
 function ServerMenu() {
 
@@ -23,12 +24,18 @@ function ServerMenu() {
         });
         const serverList = await response.json();
         if (response.status == 200) {
-            for (var i = 0; i < serverList.length; i++) {
-                const listItems = serverList.map(serverName => 
-                    <tr onClick={() => goToServer(serverName)}><td><i className="fa-solid fa-server"></i>{serverName}</td></tr>
-                );
-                setServerHTML(listItems);
-            }
+            const listItems = serverList.map(server => {
+                    if (server["status"] === 3) {
+                        return <tr className={styles.inaccessibleServer}>
+                            <td><i className="fa-solid fa-server"></i>{server["name"]}</td>
+                        </tr>
+                    }
+                    return <tr onClick={() => goToServer(server["name"])}>
+                        <td><i className="fa-solid fa-server"></i>{server["name"]}</td>
+                    </tr>
+                }
+            );
+            setServerHTML(listItems);
         } else if (response.status == 401) {
             navigate("/login");
             // alert("You are not logged in.")
@@ -50,14 +57,18 @@ function ServerMenu() {
             setCreateServerButton(false);
         }
     }
-    
+
+    function openServerCreator() {
+        navigate("/create");
+    }
+
     return (
         <>
             <h1 className={styles.pageTitle}>Servers</h1>
             <table className={styles.serverTable}>
                 {serverHTML}
             </table>
-            {createServerButton ? <button className={styles.addServerBtn}> + </button> : ""}
+            {createServerButton ? <button onClick={openServerCreator} className={styles.addServerBtn}> + </button> : ""}
         </>
     )
 }

@@ -29,18 +29,20 @@
 
 .container select, input {
     background-color: var(--bg);
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding: 10px;
     color: var(--gray);
     border: none;
     border-radius: 10px;
     font-size: 12pt;
     outline: 2px solid var(--light-bg);
     font-family: "Roboto", sans-serif;
-    margin-bottom: 20px;
     transition: all 0.15s;
+}
+
+.error {
+    margin-top: 0;
+    color: var(--error-text);
+    margin-bottom: 10px;
 }
 
 .container select:hover {

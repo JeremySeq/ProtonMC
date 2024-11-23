@@ -16,6 +16,23 @@
     transform: scale(1.4);
 }
 
+.serverTable td i:nth-child(2) {
+    transform: scale(1) !important;
+    float: right;
+}
+
+.stoppedServer td i:nth-child(2) {
+    color: var(--error-text);
+}
+
+.startingServer td i:nth-child(2) {
+    color: var(--warning-text);
+}
+
+.runningServer td i:nth-child(2) {
+    color: var(--success-text);
+}
+
 .serverTable td, .serverTable th {
     padding: 20px;
     font-size: 14pt;
@@ -23,13 +40,13 @@
     border-radius: 15px;
 }
 
-.serverTable tr {
+.serverTable tr td:first-child {
     background-color: var(--light-bg);
     transition: all 0.15s;
     color: var(--gray);
 }
 
-.serverTable tr:hover {
+.serverTable tr td:first-child:hover {
     background-color: var(--primary);
     cursor: pointer;
     color: var(--black);
@@ -49,6 +66,23 @@
     transform: scale(1) !important;
 }
 
+.deleteButton {
+    width: 10px !important;
+}
+
+.deleteButton button {
+    background-color: transparent;
+    border: none;
+    color: var(--gray);
+    transition: all 200ms;
+}
+
+.deleteButton button:hover {
+    background-color: transparent;
+    border: none;
+    color: var(--error-text);
+    cursor: pointer;
+}
 
 .tableTop {
     background-color: transparent !important;
@@ -93,4 +127,55 @@
     cursor: pointer;
     color: var(--black);
     transform: translateX(-50%) scale(1.025);
+}
+
+.deleteServerPopup {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    border-radius: 15px;
+    background-color: var(--light-bg);
+    border: 3px solid var(--bg);
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0 !important;
+}
+
+.deleteServerPopup input {
+    outline-color: var(--error-text);
+    color: var(--white);
+}
+
+.deleteServerPopup button {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 15px;
+    border: none;
+    font-size: 13pt;
+}
+
+.deleteServerPopup button:disabled {
+    background-color: var(--light-bg);
+    color: var(--error-bg);
+}
+
+.deleteServerPopup button:enabled {
+    background-color: var(--error-bg);
+    color: var(--error-text);
+}
+
+.deleteServerPopup button:enabled:hover {
+    cursor: pointer;
+    background-color: var(--bg);
+    color: var(--error-text);
+}
+
+.deleteServerPopup h2 button {
+    width: 40px;
+    height: 40px;
+    float: right;
 }

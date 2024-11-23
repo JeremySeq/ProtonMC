@@ -119,7 +119,8 @@ def asyncDeleteServer(name):
             pass
         server_folder = server.server_location
         shutil.rmtree(server_folder)
-        servers.remove("some random thing")
+        server = getServerByName(name)
+        servers.remove(server)
         setServerInfoToJson()
         print(f"Server \"{name}\" deleted successfully.")
         result[0] = True

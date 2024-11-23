@@ -156,6 +156,7 @@
     border-radius: 15px;
     border: none;
     font-size: 13pt;
+    font-family: "Roboto", sans-serif;
 }
 
 .deleteServerPopup button:disabled {

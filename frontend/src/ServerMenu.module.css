@@ -148,6 +148,7 @@
 .deleteServerPopup input {
     outline-color: var(--error-text);
     color: var(--white);
+    margin-bottom: 20px;
 }
 
 .deleteServerPopup button {
@@ -157,6 +158,7 @@
     border: none;
     font-size: 13pt;
     font-family: "Roboto", sans-serif;
+    transition: all 0.15s;
 }
 
 .deleteServerPopup button:disabled {

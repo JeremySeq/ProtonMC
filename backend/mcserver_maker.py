@@ -155,6 +155,9 @@ def install_forge_server(server_folder, game_version):
     
     # Forge's API for listing builds (replace "promotions_slim" if URL changes)
     forge_url = "https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json"
+
+    if is_version_leq_1_5_1(game_version):
+        return False
     
     try:
         # Fetch Forge versions JSON
@@ -169,12 +172,22 @@ def install_forge_server(server_folder, game_version):
             return False
         
         forge_version = data['promos'][version_key]
+        # if game_version.split(".")[0] == 1 and game_version.split(".")[1] <
         download_url = f"https://maven.minecraftforge.net/net/minecraftforge/forge/{game_version}-{forge_version}/forge-{game_version}-{forge_version}-installer.jar"
         
         # Download the installer JAR
         print(f"Downloading Forge installer for {game_version} (Forge version {forge_version})...")
         jar_response = requests.get(download_url, stream=True)
-        jar_response.raise_for_status()
+        try:
+            jar_response.raise_for_status()
+        except requests.exceptions.HTTPError:
+            # Now we try with a slightly different download url which seems to be needed for around <= 1.10
+            download_url = f"https://maven.minecraftforge.net/net/minecraftforge/forge/{game_version}-{forge_version}-{game_version}/forge-{game_version}-{forge_version}-{game_version}-installer.jar"
+
+            # Download the installer JAR
+            print(f"(Retrying) Downloading Forge installer for {game_version} (Forge version {forge_version})...")
+            jar_response = requests.get(download_url, stream=True)
+            jar_response.raise_for_status()
         
         # Save the jar file
         filename = f"forge-{game_version}-{forge_version}-installer.jar"
@@ -206,9 +219,26 @@ def install_forge_server(server_folder, game_version):
         if line != "":
             print(line.decode('utf-8'))
 
-    edit_forge_run_scripts(server_folder, jdk_path)
+
+    if os.path.exists(os.path.join(server_folder, "run.bat")):
+        print("Editing Forge run scripts...")
+        edit_forge_run_scripts(server_folder, jdk_path)
+    else:
+        print("Creating run scripts...")
+        latest_jar = get_latest_jar(server_folder)
+        create_run_scripts(server_folder, jdk_path, latest_jar)
 
     return True
+
+
+def get_latest_jar(directory):
+    jar_files = [f for f in os.listdir(directory) if f.endswith(".jar")]
+    if not jar_files:
+        return None
+    jar_files_full_path = [os.path.join(directory, f) for f in jar_files]
+    latest_jar = max(jar_files_full_path, key=os.path.getmtime)
+    return latest_jar
+
 
 def install_neoforge_server(server_folder, game_version: str):
     download_url = f"https://maven.neoforged.net/releases/net/neoforged/neoforge/"
@@ -388,10 +418,28 @@ def get_forge_versions_available() -> list[str]:
 
         versions = list(set(versions))
 
+        # remove all versions <= 1.5.1
+        copy = versions.copy()
+        for version in copy:
+            if is_version_leq_1_5_1(version):
+                versions.remove(version)
+
         return versions
     except requests.RequestException as e:
         print(f"Error: {e}")
         return []
+
+
+def is_version_leq_1_5_1(version_str):
+    """
+    For versions <= 1.5.1, Forge distributes a zipfile instead of installer jar.
+    For now, I'll just disable these versions for installation.
+    """
+    target_version = [1, 5, 1]
+    input_version = list(map(int, version_str.split('.')))
+    while len(input_version) < len(target_version):
+        input_version.append(0)
+    return input_version <= target_version
     
 def get_neoforge_versions_available() -> list[str]:
     url = f"https://maven.neoforged.net/releases/net/neoforged/neoforge/"

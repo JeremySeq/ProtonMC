@@ -4,20 +4,38 @@
 A website control panel for Minecraft servers.
 Built with Flask and React.
 
+Tested to work on Windows and Linux.
+
+Supports the following servers (+ automated installation) (although others may be possible by installing manually):
+- Spigot
+- Forge
+- NeoForge
+- Fabric
+
 ## Deployment
 
 
 ### Minecraft Server Setup
 
-You should first make sure you have a Minecraft server set up.
+You can create your own Minecraft servers using the website. 
+If you want to import your own server, do the following:
 
-**You must have a `run.bat` file in your server folder**. This file will launch the server.
+1. **You must have a `run.bat` and/or `run.sh` file in your server folder**. This file will launch the server.
 
-Here's an example of a `run.bat` file for a Spigot server:
-```bat
-cd "C:\MinecraftServers\MyRandomServer\"
-java -Xmx4G -Xms4G -jar server.jar nogui
-```
+    Here's an example of a `run.bat` file for a Spigot server:
+    ```bat
+    java -Xmx4G -Xms4G -jar server.jar nogui
+    ```
+
+2. Add a new server entry to `servers.json` with all the info filled in:
+    ```json
+    "Server Name": {
+        "server_type": "?",
+        "server_folder": "?",
+        "backup_folder": "?",
+        "game_version": "?"
+    }
+    ```
 
 ### ProtonMC setup
 

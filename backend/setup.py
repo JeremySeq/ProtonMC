@@ -13,10 +13,12 @@ def create_default_servers_json():
     file = open(serversJson, "w", encoding="utf-8")
 
     json.dump({
-        "My Spigot Server": {
-            "server_folder": "C:\\MinecraftServers\\My Spigot Server\\",
-            "backup_folder": "C:\\MinecraftServers\\backups\\My Spigot Server\\"
+        "servers_folder": os.path.join(os.getcwd(), "servers"),
+        "backups_folder": os.path.join(os.getcwd(), "backups"),
+        "servers_list": {
+            
         }
+        
     }, file, indent=4)
 
     file.close()
@@ -66,11 +68,20 @@ def verify_secret_key():
     load_dotenv()
     secret_key = os.getenv('SECRET_KEY')
     if secret_key is None:
-        print("Create a .env file with the SECRET_KEY variable")
+        print("Add the SECRET_KEY variable to your .env file")
     else:
-        print("Secret key is all good!")
+        print("SECRET_KEY is all good!")
+
+def verify_curseforge_api_key():
+    load_dotenv()
+    cf_api_key = os.getenv('CURSEFORGE_API_KEY')
+    if cf_api_key is None:
+        print("Add the CURSEFORGE_API_KEY variable to your .env file")
+    else:
+        print("CURSEFORGE_API_KEY is all good!")
 
 if __name__ == "__main__":
     verify_secret_key()
+    verify_curseforge_api_key()
     verify_servers_json()
     verify_users_json()

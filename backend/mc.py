@@ -7,14 +7,34 @@ import subprocess
 from threading import Thread
 import zipfile
 import time
+import threading
+from enum import Enum
 from util import *
 import progressbar
-
+import platform
+from server_types import ServerType
+import extract_mod_info
 
 class MCserver:
-    def __init__(self, name, server_location, backup_location):
+
+    class ServerStatus(Enum):
+        STOPPED = 0
+        STARTING = 1
+        RUNNING = 2
+        CREATING = 3
+
+    def __init__(self, name, server_type, server_location, backup_location, game_version=None):
+        self.server_type = server_type
+        self.game_version = game_version
         self.server_location = server_location
         self.backup_location = backup_location
+        # create backup folder for server if necessary
+        try:
+            os.mkdir(self.backup_location)
+        except FileExistsError:
+            pass
+        except FileNotFoundError:
+            print(f"Could not find backup folder for server: {name}.")
         self.name = name
         self.console = []
         self.subprocess = None
@@ -24,8 +44,23 @@ class MCserver:
         self.is_operational = False
         self.players = []
 
+        # self.async_create_backup_directory()
+
     def __str__(self):
         return self.name
+    
+    def async_create_backup_directory(self):
+        def try_mkdir():
+            try:
+                os.mkdir(self.backup_location)
+            except FileExistsError:
+                pass
+            except FileNotFoundError:
+                print(f"Could not find backup folder for server: {self.name}.")
+        
+        thread = threading.Thread(target=try_mkdir)
+        thread.daemon = True
+        thread.start()
 
     def stop(self):
         self.runCommand("stop")
@@ -61,13 +96,13 @@ class MCserver:
         b = f'{self.backup_location}\\{month}-{day}-{year}_{hour}-{minute}'
         # os.mkdir(b)
 
-        self.zip_folder(a, self.backup_location, f"{month}-{day}-{year}_{hour}-{minute}.zip")
+        self.zip_folder_for_backup(a, self.backup_location, f"{month}-{day}-{year}_{hour}-{minute}.zip")
 
         # self.copy(a, b)
         print("Done backup.")
         self.backup_thread = None
 
-    def zip_folder(self, folder_path, zip_dest_folder, zip_filename):
+    def zip_folder_for_backup(self, folder_path, zip_dest_folder, zip_filename):
         # Create the full path for the zip file
         zip_file_path = os.path.join(zip_dest_folder, zip_filename)
 
@@ -288,6 +323,19 @@ class MCserver:
             return False
         return False
     
+    def getServerStatus(self):
+        running = self.isServerRunning()
+        operational = self.isServerOperational()
+        
+        if not running:
+            return MCserver.ServerStatus.STOPPED
+        
+        if not operational:
+            return MCserver.ServerStatus.STARTING
+        
+        return MCserver.ServerStatus.RUNNING
+
+    
     def getStartTime(self):
         if not self.isServerRunning():
             return False
@@ -326,14 +374,30 @@ class MCserver:
         # set operational status as false in case it was true before
         self.is_operational = False
 
-        serverRunPath = self.server_location + "run.bat"
 
-        self.subprocess = subprocess.Popen(
-            "\"" + serverRunPath + "\"", 
-            stdin=subprocess.PIPE, 
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
-        )
+        # Use run.bat or run.sh file (depending on the operating system)
+        system = platform.system()
+        # windows: run.bat
+        if system == "Windows":
+            serverRunPath = os.path.join(self.server_location, "run.bat")
+
+            self.subprocess = subprocess.Popen(
+                [serverRunPath, "nogui"],
+                cwd=self.server_location,
+                stdin=subprocess.PIPE, 
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT
+            )
+        else: # linux/mac: run.sh
+            serverRunPath = os.path.join(self.server_location, "run.sh")
+
+            self.subprocess = subprocess.Popen(
+                ["sh", serverRunPath, "nogui"],
+                cwd=self.server_location,
+                stdin=subprocess.PIPE, 
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT
+            )
 
         def server_read_lines(process, queue):
             while True:
@@ -388,3 +452,28 @@ class MCserver:
                 print("Thread did not terminate in time, forcefully terminating.")
             else:
                 print("Thread joined, server blocking method exiting.")
+
+    def isModded(self):
+        modded = [ServerType.FORGE, ServerType.NEOFORGE, ServerType.FABRIC]
+        if self.server_type in modded:
+            return True
+        return False
+
+    def getModList(self):
+        """Returns list of mods in the server's mods folder. 
+        [(file_name, mod_name), etc.] where file_name is the jarfile name,
+        and mod_name is the extracted mod name from the mod metadata"""
+
+        if not self.isModded():
+            return []
+        results = []
+        mods_folder = os.path.join(self.server_location, "mods")
+        for dirpath, dirnames, filenames in os.walk(mods_folder):
+            for file in filenames:
+                path = os.path.join(dirpath, *dirnames, file)
+                try:
+                    mod_name = extract_mod_info.get_mod_name(path)
+                except:
+                    print("Error while extracting mod metadata.")
+                results.append((file, mod_name))
+        return results

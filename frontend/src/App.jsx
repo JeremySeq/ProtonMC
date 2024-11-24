@@ -13,6 +13,7 @@ import LoginPage from './LoginPage';
 import {hasAuth} from './AuthorizationHelper';
 import ErrorPage from './ErrorPage'
 import { NotificationProvider } from './NotificationContext';
+import ServerCreator from "./ServerCreator.jsx";
 
 function App() {
   const router = createBrowserRouter([
@@ -34,6 +35,11 @@ function App() {
     {
       path: "/servers",
       element: <ServerMenu></ServerMenu>,
+      loader() {return protectedLoader()}
+    },
+    {
+      path: "/create",
+      element: <ServerCreator></ServerCreator>,
       loader() {return protectedLoader()}
     },
     {

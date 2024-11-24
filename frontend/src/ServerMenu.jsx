@@ -31,7 +31,7 @@ function ServerMenu() {
             const listItems = serverList.map(server => {
                     if (server["status"] === 3) {
                         return <tr key={server["name"]} className={styles.inaccessibleServer}>
-                            <td><i className="fa-solid fa-server"></i>{server["name"]} - Creating...</td>
+                            <td><i className="fa-solid fa-server"></i>{server["name"]} - Creating... <div className={styles.loader}></div></td>
                         </tr>
                     } else if (server["status"] === 2) {
                         return <tr key={server["name"]} className={styles.runningServer}>
@@ -113,8 +113,8 @@ function ServerMenu() {
             headers: getAuthHeader(),
             body: formData
         });
-        const res = await response.json();
-        if (res.status === 200) {
+        await response.json();
+        if (response.status === 200) {
             console.log("Deleted server " + deleteServerPopup);
         } else {
             console.log("Error deleting server " + deleteServerPopup);

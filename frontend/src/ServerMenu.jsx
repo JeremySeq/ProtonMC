@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 function ServerMenu() {
 
     const [serverHTML, setServerHTML] = useState('');
-    const [createServerButton, setCreateServerButton] = useState(false);
+    const [serverCreationPermissions, setServerCreationPermissions] = useState(false);
     const [deleteServerPopup, setDeleteServerPopup] = useState(false);
     const [confirmDeletionInput, setConfirmDeletionInput] = useState('');
     const [finalDeleteButtonEnabled, setFinalDeleteButtonEnabled] = useState(false);
@@ -46,12 +46,21 @@ function ServerMenu() {
                                 className="fa-solid fa-circle"></i></td>
                         </tr>
                     }
+
+                    if (serverCreationPermissions) {
+                        return <tr key={server["name"]} className={styles.stoppedServer}>
+                            <td onClick={() => goToServer(server["name"])}><i
+                                className="fa-solid fa-server"></i>{server["name"]}<i className="fa-solid fa-circle"></i>
+                            </td>
+                            <td className={styles.deleteButton}>
+                                <button onClick={() => openDeleteServerPopup(server["name"])}><i
+                                    className="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    }
                     return <tr key={server["name"]} className={styles.stoppedServer}>
                         <td onClick={() => goToServer(server["name"])}><i
                             className="fa-solid fa-server"></i>{server["name"]}<i className="fa-solid fa-circle"></i>
-                        </td>
-                        <td className={styles.deleteButton}>
-                            <button onClick={() => openDeleteServerPopup(server["name"])}><i className="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 }
@@ -74,16 +83,16 @@ function ServerMenu() {
     }, []);
 
     useEffect(() => {
+        updateServerCreationPermissions();
         updateServers();
-        updateButton();
-    }, []);
+    }, [serverCreationPermissions]);
 
-    async function updateButton() {
-        var permLevel = await getUserPermissionLevel();
+    async function updateServerCreationPermissions() {
+        const permLevel = await getUserPermissionLevel();
         if (permLevel >= 5) {
-            setCreateServerButton(true);
+            setServerCreationPermissions(true);
         } else {
-            setCreateServerButton(false);
+            setServerCreationPermissions(false);
         }
     }
 
@@ -134,7 +143,7 @@ function ServerMenu() {
             <table className={styles.serverTable}>
                 {serverHTML}
             </table>
-            {createServerButton ? <button onClick={openServerCreator} className={styles.addServerBtn}> + </button> : ""}
+            {serverCreationPermissions ? <button onClick={openServerCreator} className={styles.addServerBtn}> + </button> : ""}
 
             {deleteServerPopup ? <div className={styles.deleteServerPopup}>
                 <h2>Delete {deleteServerPopup}

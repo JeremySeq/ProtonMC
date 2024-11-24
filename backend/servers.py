@@ -57,7 +57,7 @@ def initServers():
     global servers
     servers = server_info
 
-def getServerByName(name):
+def getServerByName(name) -> mc.MCserver | None:
     for server in servers:
         if server.name == name:
             return server
@@ -121,6 +121,9 @@ def asyncDeleteServer(name):
         shutil.rmtree(server_folder)
         server = getServerByName(name)
         servers.remove(server)
+        if len(os.listdir(server.backup_location)) == 0:
+            shutil.rmtree(server.backup_location)
+            print("Deleted empty server backups folder.")
         setServerInfoToJson()
         print(f"Server \"{name}\" deleted successfully.")
         result[0] = True

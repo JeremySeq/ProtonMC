@@ -80,7 +80,7 @@ function ServerMenu() {
         }, 2500);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [serverCreationPermissions]);
 
     useEffect(() => {
         updateServerCreationPermissions();

@@ -1,87 +1,104 @@
-"""Contains functions for setting up the default configs.
-    - secret key in .env
-    - servers.json
-    - users.json
-"""
-
 import os
 import json
-from dotenv import load_dotenv
-from servers import serversJson
+import secrets
+from dotenv import load_dotenv, set_key
+
+# File paths
+SERVERS_JSON = 'servers.json'
+USERS_JSON = 'users.json'
+ENV_FILE = 'backend/.env'
+
 
 def create_default_servers_json():
-    file = open(serversJson, "w", encoding="utf-8")
-
-    json.dump({
+    """Creates the default servers.json file."""
+    default_servers_data = {
         "servers_folder": os.path.join(os.getcwd(), "servers"),
         "backups_folder": os.path.join(os.getcwd(), "backups"),
-        "servers_list": {
-            
-        }
-        
-    }, file, indent=4)
+        "servers_list": {}
+    }
+    with open(SERVERS_JSON, "w", encoding="utf-8") as file:
+        json.dump(default_servers_data, file, indent=4)
+    print(f"{SERVERS_JSON} created.")
 
-    file.close()
 
 def create_default_users_json():
-    file = open("users.json", "w", encoding="utf-8")
-
-    json.dump({
+    """Creates the default users.json file."""
+    default_users_data = {
         "admin": {
             "username": "admin",
             "password": "admin123",
             "permissions": 5
         }
-    }, file, indent=4)
+    }
+    with open(USERS_JSON, "w", encoding="utf-8") as file:
+        json.dump(default_users_data, file, indent=4)
+    print(f"{USERS_JSON} created.")
+    print("Username: admin")
+    print("Password: admin123")
 
-    file.close()
+def create_default_env_file():
+    """Creates the default .env file with a SECRET_KEY."""
+    secret_key = secrets.token_hex(16)
+    with open(ENV_FILE, "w", encoding="utf-8") as file:
+        file.write(f"SECRET_KEY=\"{secret_key}\"\n")
+    print(f"{ENV_FILE} created with a generated SECRET_KEY.")
 
-def verify_servers_json():
-    try:
-        file = open(serversJson, 'r', encoding='utf-8')
-        json.load(file)
-    except FileNotFoundError:
-        print("servers.json does not exist...")
-        print("Creating example servers.json...")
-        print("PLEASE OPEN servers.json AND FILL IN THE APPROPRIATE INFORMATION")
-        create_default_servers_json()
-    except json.JSONDecodeError:
-        print("Error decoding servers.json")
+def ask_for_curseforge_api_key():
+    """Prompts the user for the CurseForge API key and saves it to .env."""
+    cf_api_key = input("Please paste your CurseForge API Key: ")
+
+    # Save the provided key to the .env file
+    load_dotenv()  # Load existing .env to set the key properly
+    set_key(ENV_FILE, 'CURSEFORGE_API_KEY', cf_api_key)
+    print("CURSEFORGE_API_KEY has been set in the .env file.")
+
+def verify_json_file(file_path, create_default_func):
+    """Checks if a JSON file exists and is valid, or creates it."""
+    if not os.path.exists(file_path):
+        print(f"{file_path} not found.")
+        create_default_func()
     else:
-        print("servers.json is all good!")
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                json.load(file)  # Try loading the JSON data to verify it's valid
+        except json.JSONDecodeError:
+            print(f"Error decoding {file_path}, recreating it...")
+            create_default_func()
+        else:
+            print(f"{file_path} is all good!")
 
-def verify_users_json():
-    try:
-        file = open("users.json", 'r', encoding='utf-8')
-        json.load(file)
-    except FileNotFoundError:
-        print("users.json does not exist...")
-        print("Creating example users.json...")
-        print("PLEASE OPEN users.json AND FILL IN THE APPROPRIATE INFORMATION")
-        create_default_users_json()
-    except json.JSONDecodeError:
-        print("Error decoding users.json")
+def verify_env_file():
+    """Checks if the .env file exists and has a valid SECRET_KEY."""
+    if not os.path.exists(ENV_FILE):
+        print(f"{ENV_FILE} not found.")
+        create_default_env_file()
     else:
-        print("users.json is all good!")
+        load_dotenv()  # Load the .env file
+        secret_key = os.getenv('SECRET_KEY')
 
-def verify_secret_key():
-    load_dotenv()
-    secret_key = os.getenv('SECRET_KEY')
-    if secret_key is None:
-        print("Add the SECRET_KEY variable to your .env file")
-    else:
-        print("SECRET_KEY is all good!")
+        if secret_key is None:
+            secret_key = secrets.token_hex(16)
+            set_key(ENV_FILE, 'SECRET_KEY', secret_key)
+            print("Generated a secret key in .env file.")
+        else:
+            print("SECRET_KEY is all good!")
 
 def verify_curseforge_api_key():
+    """Checks if CURSEFORGE_API_KEY exists in the .env file."""
     load_dotenv()
     cf_api_key = os.getenv('CURSEFORGE_API_KEY')
+
     if cf_api_key is None:
-        print("Add the CURSEFORGE_API_KEY variable to your .env file")
+        print("CURSEFORGE_API_KEY not found in the .env file.")
+        ask_for_curseforge_api_key()  # Ask user to provide the key
     else:
         print("CURSEFORGE_API_KEY is all good!")
 
 if __name__ == "__main__":
-    verify_secret_key()
-    verify_curseforge_api_key()
-    verify_servers_json()
-    verify_users_json()
+    # Verify and create all necessary files if they don't exist
+    verify_env_file()  # Ensure .env exists and has a SECRET_KEY
+    verify_curseforge_api_key()  # Ensure CURSEFORGE_API_KEY is set
+    verify_json_file(SERVERS_JSON, create_default_servers_json)  # Check servers.json
+    verify_json_file(USERS_JSON, create_default_users_json)  # Check users.json
+
+    input("----PRESS ENTER TO CONTINUE----")

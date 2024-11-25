@@ -13,8 +13,9 @@ Supports the following servers (+ automated installation) (although others may b
 - Fabric
 
 ## Installation
-
 **Windows and Linux**
+
+Prerequisites: **Python**
 
 1. Download the latest build zipfile.
 2. Extract the contents.

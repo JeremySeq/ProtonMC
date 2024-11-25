@@ -1,6 +1,8 @@
-import os
 import json
+import os
 import secrets
+
+from colorama import Fore, Style
 from dotenv import load_dotenv, set_key
 
 # File paths
@@ -33,8 +35,8 @@ def create_default_users_json():
     with open(USERS_JSON, "w", encoding="utf-8") as file:
         json.dump(default_users_data, file, indent=4)
     print(f"{USERS_JSON} created.")
-    print("Username: admin")
-    print("Password: admin123")
+    print("Username: " + Fore.CYAN + "admin" + Style.RESET_ALL)
+    print("Password: " + Fore.CYAN + "admin123" + Style.RESET_ALL)
 
 def create_default_env_file():
     """Creates the default .env file with a SECRET_KEY."""
@@ -45,7 +47,7 @@ def create_default_env_file():
 
 def ask_for_curseforge_api_key():
     """Prompts the user for the CurseForge API key and saves it to .env."""
-    cf_api_key = input("Please paste your CurseForge API Key: ")
+    cf_api_key = input(Fore.CYAN + "Please paste your CurseForge API Key: " + Style.RESET_ALL)
 
     # Save the provided key to the .env file
     load_dotenv()  # Load existing .env to set the key properly
@@ -101,4 +103,6 @@ if __name__ == "__main__":
     verify_json_file(SERVERS_JSON, create_default_servers_json)  # Check servers.json
     verify_json_file(USERS_JSON, create_default_users_json)  # Check users.json
 
-    input("----PRESS ENTER TO CONTINUE----")
+    print(Fore.GREEN + "----SETUP COMPLETE----" + Style.RESET_ALL)
+
+    input("Press enter to continue . . . ")

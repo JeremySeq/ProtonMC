@@ -12,6 +12,8 @@ import os
 import shutil
 import subprocess
 
+from colorama import Fore, Style
+
 DIST_FOLDER = os.path.join(os.path.abspath(os.getcwd()), "dist", "ProtonMC")
 
 def run_npm_build():
@@ -101,7 +103,7 @@ def build():
 
     print("Created run scripts.")
 
-    print("----BUILD COMPLETE----")
+    print(Fore.GREEN + "----BUILD COMPLETE----" + Style.RESET_ALL)
 
 if __name__ == "__main__":
     build()

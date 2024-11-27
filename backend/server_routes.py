@@ -282,19 +282,28 @@ def install_mod(server):
             except KeyError:
                 pass
     project_id = request.form.get("project_id")
-    mods_folder = os.path.join(server.server_location, "mods")
 
-    result = None
-    if platform == mod_helper.Platform.CURSEFORGE:
-        result = mod_helper.download_curseforge_mod(
-            project_id, mods_folder,
-            server.server_type.name.lower(),
-            server.game_version if server.game_version else "")
+    if server.server_type == mod_helper.ModType.MOD:
+        mods_folder = os.path.join(server.server_location, "mods")
+
+        if platform == mod_helper.Platform.CURSEFORGE:
+            result = mod_helper.download_curseforge_mod(
+                project_id, mods_folder,
+                server.server_type.name.lower(),
+                server.game_version if server.game_version else "")
+        else:
+            result = mod_helper.download_modrinth_mod(
+                project_id, mods_folder,
+                server.server_type.name.lower(),
+                server.game_version if server.game_version else "")
     else:
-        result = mod_helper.download_modrinth_mod(
-            project_id, mods_folder,
-            server.server_type.name.lower(),
-            server.game_version if server.game_version else "")
+        plugins_folder = os.path.join(server.server_location, "plugins")
+        if platform == mod_helper.Platform.CURSEFORGE:
+            result = mod_helper.download_curseforge_plugin(
+                project_id, plugins_folder)
+        else:
+            result = mod_helper.download_modrinth_plugin(
+                project_id, plugins_folder)
 
     if result[1] != 200:
         return jsonify({"error": result[0]}), 500
@@ -308,7 +317,7 @@ def delete_mod(server):
     """Deletes a mod from the server."""
     server = servers.getServerByName(server)
     filename = request.form.get("filename")
-    path = os.path.join(server.server_location, "mods", filename)
+    path = os.path.join(server.server_location, "mods" if server.getModType() == mod_helper.ModType.MOD else "plugins", filename)
     try:
         os.remove(path)
     except FileNotFoundError:

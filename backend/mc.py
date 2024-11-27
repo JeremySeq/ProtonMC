@@ -484,16 +484,21 @@ class MCserver:
         [(file_name, mod_name), etc.] where file_name is the jarfile name,
         and mod_name is the extracted mod name from the mod metadata"""
 
-        if not self.isModded():
-            return []
         results = []
-        mods_folder = os.path.join(self.server_location, "mods")
-        for dirpath, dirnames, filenames in os.walk(mods_folder):
-            for file in filenames:
-                path = os.path.join(dirpath, *dirnames, file)
+        mods_folder = os.path.join(
+            self.server_location,
+            "mods" if self.getModType() == mod_helper.ModType.MOD else "plugins"
+        )
+
+        for file in os.listdir(mods_folder):
+            path = os.path.join(mods_folder, file)
+            if os.path.isfile(path) and file.endswith(".jar"):
                 try:
                     mod_name = extract_mod_info.get_mod_name(path)
-                except:
+                except Exception as e:
+                    print(e)
                     print("Error while extracting mod metadata.")
+                    mod_name = file
                 results.append((file, mod_name))
+
         return results

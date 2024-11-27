@@ -172,6 +172,49 @@ def search_curseforge_mods(search_query, mod_loader=None, version=None, project_
 
     return search_results
 
+def download_curseforge_plugin(project_id, destination_path):
+    """
+    Downloads a plugin from curseforge given its project id
+    to a destination path.
+    Returns [message, status_code]
+    """
+    headers = {
+        'Accept': 'application/json',
+        'x-api-key': CURSEFORGE_API_KEY
+    }
+
+    params = {
+    }
+
+    url = f'https://api.curseforge.com/v1/mods/{project_id}/files'
+
+    try:
+        r = requests.get(url, headers = headers, params=params, timeout=4)
+    except requests.exceptions.ReadTimeout:
+        return "Could not connect to Curseforge.", 500
+
+    if r.status_code != 200:
+        print("Request to " + url + " failed with status code " + str(r.status_code))
+        return "Could not connect to Curseforge.", 500
+
+    files_found = r.json()["data"]
+
+    if len(files_found) > 0:
+        # download the first file
+        filename = files_found[0]["fileName"]
+        download_url = files_found[0]["downloadUrl"]
+        response = requests.get(download_url, timeout=4)
+        if response.status_code == 200:
+            with open(os.path.join(destination_path, filename), 'wb') as file:
+                file.write(response.content)
+                print(f"Downloaded {filename}")
+            return "Downloaded plugin.", 200
+        else:
+            print(f"Failed to download {filename}")
+            return "Download failed.", 500
+    else:
+        return "No compatible files found.", 500
+
 def download_curseforge_mod(project_id, destination_path, mod_loader, minecraft_version):
     """Downloads a mod from Curseforge given its project id 
     (+ modloader and minecraft version) to a destination path.
@@ -222,6 +265,48 @@ def download_curseforge_mod(project_id, destination_path, mod_loader, minecraft_
             return "Download failed.", 500
     else:
         return "No compatible files found.", 500
+
+def download_modrinth_plugin(project_id, destination_path):
+    """
+    Downloads a plugin from Modrinth given its project id
+    to a destination path.
+
+    Return [message, status_code]
+    """
+    url = f'https://api.modrinth.com/v2/project/{project_id}/version'
+
+    params = {
+        "loaders": f'["bukkit"]',
+    }
+
+    try:
+        r = requests.get(url, params=params, timeout=4)
+    except requests.exceptions.ReadTimeout:
+        return "Could not connect to Modrinth.", 500
+
+    if r.status_code != 200:
+        print("Request to " + url + " failed with status code " + str(r.status_code))
+        return "Could not connect to Modrinth.", 500
+
+    files_found = r.json()
+
+    if len(files_found) > 0:
+        # download the first file
+        file = files_found[0]["files"][0]
+        filename = file["filename"]
+        download_url = file["url"]
+        r = requests.get(download_url, timeout=4)
+        if r.status_code == 200:
+            with open(os.path.join(destination_path, filename), 'wb') as file:
+                file.write(r.content)
+                print(f"Downloaded {filename}")
+            return "Downloaded plugin.", 200
+        else:
+            print(f"Failed to download {filename}")
+            return "Download failed.", 500
+    else:
+        return "No compatible files found.", 500
+
 
 def download_modrinth_mod(project_id, destination_path, mod_loader, minecraft_version):
     """Downloads a mod from Modrinth given its project id 

@@ -7,7 +7,7 @@ import difflib
 
 
 def extract_mod_metadata(jar_path):
-    metadata_files = ['mcmod.info', 'fabric.mod.json', 'META-INF/mods.toml']
+    metadata_files = ['mcmod.info', 'fabric.mod.json', 'META-INF/mods.toml', "plugin.yml"]
     
     with zipfile.ZipFile(jar_path, 'r') as jar:
         for file in metadata_files:
@@ -37,6 +37,12 @@ def read_forge_toml(data):
     except KeyError:
         pass
     return display_name, authors
+
+def read_plugin_yml(data):
+    lines = data.split("\n")
+    for line in lines:
+        if line.startswith("name:"):
+            return line.removeprefix("name:").strip()
 
 def match(display_name, authors):
     mods = mod_helper.search_curseforge_mods(display_name, limit=50)
@@ -81,6 +87,9 @@ def get_mod_name(filepath):
     elif file_read == 'fabric.mod.json':
         data = metadata[1].decode('utf-8')
         name = read_fabric_json(data)[0]
+    elif file_read == "plugin.yml":
+        data = metadata[1].decode('utf-8')
+        name = read_plugin_yml(data)
     return name
 
 if __name__ == '__main__':

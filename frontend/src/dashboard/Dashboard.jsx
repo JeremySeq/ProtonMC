@@ -1,7 +1,7 @@
 import { useParams, Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import API_SERVER from "../Constants";
-import {getAuthHeader, userHasPermissionTo} from "../AuthorizationHelper";
+import {getAuthHeader} from "../AuthorizationHelper";
 import styles from "./Dashboard.module.css";
 
 function Dashboard() {
@@ -23,10 +23,9 @@ function Dashboard() {
         if (response.status === 200) {
             let type = json["type"];
             if (type === "FORGE" || type === "FABRIC" || type === "NEOFORGE") {
-                modded = true;
-            }
-            if (type === "SPIGOT") {
-                plugins = true;
+                setModsEnabled(true);
+            } else if (type === "SPIGOT") {
+                setPluginsEnabled(true);
             }
         } else if (response.status === 401) {
             alert("You are not logged in.");
@@ -36,10 +35,6 @@ function Dashboard() {
         } else {
             console.error("Error");
         }
-
-        const perm = await userHasPermissionTo("install_mod");
-        setModsEnabled(perm && modded);
-        setPluginsEnabled(perm && plugins);
     }
 
     useEffect(() => {
@@ -53,7 +48,7 @@ function Dashboard() {
     const sidebarLinks = [
         { path: `/servers/${serverName}/overview`, label: "Overview", icon: "fa-solid fa-house" },
         { path: `/servers/${serverName}/console`, label: "Console", icon: "fa-regular fa-file" },
-        { path: `/servers/${serverName}/backups`, label: "Backups", icon: "fa-solid fa-clone" },
+        { path: `/servers/${serverName}/backups`, label: "Backups", icon: "fa-solid fa-clone" }
     ];
 
     if (modsEnabled) {

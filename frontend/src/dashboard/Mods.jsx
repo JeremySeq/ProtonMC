@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import styles from "./Mods.module.css";
 import API_SERVER from "../Constants";
-import { getAuthHeader, getUserPermissionLevel } from "../AuthorizationHelper";
+import {getAuthHeader, userHasPermissionTo} from "../AuthorizationHelper";
 import { useEffect, useState } from "react";
 import { useNotification } from '../NotificationContext';
 
@@ -10,13 +10,32 @@ function Mods() {
     const { serverName } = useParams();
 
     const [modList, setModList] = useState([]);
+    const [modType, setModType] = useState("mod");
 
     const [searchPlatform, setSearchPlatform] = useState("curseforge");
 
     const [searchModList, setSearchModList] = useState([]);
-    const [canInstallMods, setCanInstallMods] = useState(true);
+    const [canInstallMods, setCanInstallMods] = useState(false);
 
     const { addNotification } = useNotification();
+
+    async function init() {
+        const response = await fetch(`${API_SERVER}/api/servers/${serverName}`, {
+            headers: getAuthHeader()
+        });
+        let json = await response.json();
+        if (response.status === 200) {
+            let type = json["type"];
+            if (type === "FORGE" || type === "FABRIC" || type === "NEOFORGE") {
+                setModType("mod");
+            } else if (type === "SPIGOT") {
+                setModType("plugin");
+            }
+        }
+
+        const perm = await userHasPermissionTo("install_mod");
+        setCanInstallMods(perm);
+    }
 
     async function downloadModsZip() {
         var prepareElement = document.getElementById("prepareModsDownload");
@@ -59,14 +78,9 @@ function Mods() {
 
     useEffect(() => {
         updateModList();
-        searchMods();
-
-        // check if user has permission to install mods, if not, set canInstallMods to false
-        getUserPermissionLevel().then((permLevel) => {
-            if (permLevel < 4) {
-                setCanInstallMods(false);
-            }
-        })
+        init().then(() => {
+            searchMods();
+        });
     }, []);
 
     useEffect(() => {
@@ -90,7 +104,7 @@ function Mods() {
             var data = await res.json();
             if (res.status == 200) {
                 updateModList();
-                addNotification("Installed mod.", "success");
+                addNotification(`Installed ${modType}.`, "success");
             } else if (res.status == 500) {
                 var err = data["error"];
                 console.log(err);
@@ -107,7 +121,7 @@ function Mods() {
             var data = await res.json();
             if (res.status == 200) {
                 updateModList();
-                addNotification("Deleted mod.", "success");
+                addNotification(`Deleted ${modType}.`, "success");
             } else if (res.status == 500) {
                 var err = data["error"];
                 console.log(err);
@@ -135,28 +149,40 @@ function Mods() {
         <div className={styles.modsContainer}>
             <div className={styles.modManagerContainer}>
                 <div className={styles.column}>
-                    <h2>{modList.length} mods installed</h2>
+                    <h2>{modList.length} {modType === "mod" ? "mods" : "plugins"} installed</h2>
                     <ul className={styles.modList}>
                         {modList.map((modListItem) => (
                             <li key={modListItem[0]} className={styles.modListItem}>
                                 <p>{modListItem[1]}</p>
-                                <button onClick={() => deleteMod(modListItem[0])}><i className="fa-solid fa-trash"></i></button>
+                                {
+                                    canInstallMods ? <button onClick={() => deleteMod(modListItem[0])}><i
+                                        className="fa-solid fa-trash"></i></button>
+                                        : ""
+                                }
                             </li>
                         ))}
                     </ul>
-                    <button className={styles.downloadModsButton} onClick={downloadModsZip}>Download Mods</button>
-                    <div style={{visibility: "hidden"}} id="prepareModsDownload" className={styles.prepareDownload}>
-                        Preparing download. Please wait...
-                    </div>
+                    {
+                        modType === "mod" ? (
+                            <>
+                                <button className={styles.downloadModsButton} onClick={downloadModsZip}>Download Mods
+                                </button>
+                                <div style={{visibility: "hidden"}} id="prepareModsDownload"
+                                     className={styles.prepareDownload}>
+                                    Preparing download. Please wait...
+                                </div>
+                            </>
+                        ) : ""
+                    }
                 </div>
 
                 { // check if the user can install mods, if they can, then show the search mods stuff, if not then don't show anything
-                    canInstallMods ? 
+                    canInstallMods ?
 
-                <div className={styles.modSearchContainer}>
-                    <h2>Search Mods on <i onClick={switchPlatform} className={searchPlatform == "curseforge" ? styles.curseforgePlatform : styles.modrinthPlatform}></i></h2>
+                        <div className={styles.modSearchContainer}>
+                        <h2>Search {modType === "mod" ? "Mods" : "Plugins"} on <i onClick={switchPlatform} className={searchPlatform == "curseforge" ? styles.curseforgePlatform : styles.modrinthPlatform}></i></h2>
                     <div className={styles.searchContainer}>
-                        <input type="text" className={styles.searchBar} onChange={searchMods} id="search-bar" placeholder="Search mods..."></input>
+                        <input type="text" className={styles.searchBar} onChange={searchMods} id="search-bar" placeholder={modType === "mod" ? "Search mods..." : "Search plugins..."}></input>
                         <button className={styles.searchButton} id="search-button"><i className="fa-solid fa-magnifying-glass"></i></button>
                     </div>
 

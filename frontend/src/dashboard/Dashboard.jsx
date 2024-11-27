@@ -63,13 +63,13 @@ function Dashboard() {
             icon: "fa-solid fa-puzzle-piece",
         });
     }
-    // if (pluginsEnabled) {
-    //     sidebarLinks.push({
-    //         path: `/servers/${serverName}/plugins`,
-    //         label: "Plugins",
-    //         icon: "fa-solid fa-puzzle-piece",
-    //     });
-    // }
+    if (pluginsEnabled) {
+        sidebarLinks.push({
+            path: `/servers/${serverName}/mods`,
+            label: "Plugins",
+            icon: "fa-solid fa-puzzle-piece",
+        });
+    }
 
     const navbarLinks = [
         { path: `/servers/`, label: "Servers", icon: "fa-solid fa-server" }

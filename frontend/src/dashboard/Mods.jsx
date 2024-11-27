@@ -163,10 +163,11 @@ function Mods() {
                     <div className={styles.resultsContainer}>
 
                         {searchModList.map((item) => (
+
                             <div className={styles.resultItem}>
                                 <img src={item["logo"]} alt="" style={{"borderRadius": item["platform"] == 2 ? "15px" : "0px"}} />
                                 <div>
-                                    <h3>{item["name"]}<i> by {item["author"]}</i></h3>
+                                    <h3><a href={item["link"]} target="_blank">{item["name"]}</a><i> by {item["author"]}</i></h3>
                                     <p>{nFormatter(item["downloads"], 1)} Downloads</p>
                                 </div>
                                 <button onClick={() => installMod(item["platform"], item["project_id"])} className={styles.installButton}>Install</button>

@@ -224,8 +224,12 @@ def get_mods_list(server):
 @server_routes.route('/<server>/mods/search', methods=["GET", "POST"])
 @check_server_exists
 def search_mod(server):
-    """Searches for mods compatible with the server"""
+    """Searches for mods/plugins compatible with the server"""
     server = servers.getServerByName(server)
+
+    if server.getModType() == mod_helper.ModType.NONE:
+        return jsonify({"message": "Server does not support mods/plugins."}), 400
+
     query = request.form.get("query")
     platform = mod_helper.Platform.CURSEFORGE
     if request.form.get("platform") is not None:
@@ -233,12 +237,19 @@ def search_mod(server):
             platform = mod_helper.Platform[request.form.get("platform").upper()]
         except KeyError:
             pass
-    mod_loader = server.server_type.name.lower()
-    mods = None
-    if platform == mod_helper.Platform.CURSEFORGE:
-        mods = mod_helper.search_curseforge_mods(query, mod_loader=mod_loader, version=server.game_version)
-    else:
-        mods = mod_helper.search_modrinth_mods(query, mod_loader=mod_loader, version=server.game_version)
+
+    mods = []
+    if server.getModType() == mod_helper.ModType.MOD:
+        mod_loader = server.server_type.name.lower()
+        if platform == mod_helper.Platform.CURSEFORGE:
+            mods = mod_helper.search_curseforge_mods(query, mod_loader=mod_loader, version=server.game_version)
+        else:
+            mods = mod_helper.search_modrinth_mods(query, mod_loader=mod_loader, version=server.game_version)
+    elif server.getModType() == mod_helper.ModType.PLUGIN:
+        if platform == mod_helper.Platform.CURSEFORGE:
+            mods = mod_helper.search_curseforge_mods(query, project_type=mod_helper.ModType.PLUGIN)
+        else:
+            mods = mod_helper.search_modrinth_mods(query, project_type=mod_helper.ModType.PLUGIN)
 
     mods_json = []
     for mod in mods:

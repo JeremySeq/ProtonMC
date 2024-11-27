@@ -1,19 +1,23 @@
-import os
-import shutil
-import psutil
 import datetime
-from queue import Queue, Empty
-import subprocess
-from threading import Thread
-import zipfile
-import time
-import threading
-from enum import Enum
-from util import *
-import progressbar
+import os
 import platform
-from server_types import ServerType
+import shutil
+import subprocess
+import threading
+import time
+import zipfile
+from enum import Enum
+from queue import Queue, Empty
+from threading import Thread
+
+import progressbar
+import psutil
+
 import extract_mod_info
+from server_types import ServerType
+import mod_helper
+from util import *
+
 
 class MCserver:
 
@@ -458,6 +462,22 @@ class MCserver:
         if self.server_type in modded:
             return True
         return False
+
+    def getModType(self):
+        """
+        Returns either MODS, PLUGINS, or NONE
+        """
+
+        modded = [ServerType.FORGE, ServerType.NEOFORGE, ServerType.FABRIC]
+        plugin = [ServerType.SPIGOT]
+
+        if self.server_type in modded:
+            return mod_helper.ModType.MOD
+        elif self.server_type in plugin:
+            return mod_helper.ModType.PLUGIN
+        else:
+            return mod_helper.ModType.NONE
+
 
     def getModList(self):
         """Returns list of mods in the server's mods folder. 

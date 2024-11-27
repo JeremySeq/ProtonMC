@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import styles from './ServerMenu.module.css';
-import {getAuthHeader, getUserPermissionLevel} from './AuthorizationHelper.jsx';
+import {getAuthHeader, userHasPermissionTo} from './AuthorizationHelper.jsx';
 import API_SERVER from './Constants.jsx'
 import { useNavigate } from "react-router-dom";
 
@@ -88,12 +88,8 @@ function ServerMenu() {
     }, [serverCreationPermissions]);
 
     async function updateServerCreationPermissions() {
-        const permLevel = await getUserPermissionLevel();
-        if (permLevel >= 5) {
-            setServerCreationPermissions(true);
-        } else {
-            setServerCreationPermissions(false);
-        }
+        const perm = await userHasPermissionTo("create_server");
+        setServerCreationPermissions(perm);
     }
 
     function openServerCreator() {

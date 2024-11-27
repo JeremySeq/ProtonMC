@@ -1,22 +1,33 @@
 import { useParams, Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import API_SERVER from "../Constants";
-import { getAuthHeader } from "../AuthorizationHelper";
+import {getAuthHeader, userHasPermissionTo} from "../AuthorizationHelper";
 import styles from "./Dashboard.module.css";
 
 function Dashboard() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [modsEnabled, setModsEnabled] = useState(false);
+    const [pluginsEnabled, setPluginsEnabled] = useState(false);
 
     const { serverName } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
 
     async function init() {
-        const response = await fetch(`${API_SERVER}/api/servers/${serverName}/status`, {
+        let modded = false;
+        let plugins = false;
+        const response = await fetch(`${API_SERVER}/api/servers/${serverName}`, {
             headers: getAuthHeader()
         });
+        let json = await response.json();
         if (response.status === 200) {
-            // Do something with the data if needed
+            let type = json["type"];
+            if (type === "FORGE" || type === "FABRIC" || type === "NEOFORGE") {
+                modded = true;
+            }
+            if (type === "SPIGOT") {
+                plugins = true;
+            }
         } else if (response.status === 401) {
             alert("You are not logged in.");
         } else if (response.status === 404) {
@@ -25,6 +36,10 @@ function Dashboard() {
         } else {
             console.error("Error");
         }
+
+        const perm = await userHasPermissionTo("install_mod");
+        setModsEnabled(perm && modded);
+        setPluginsEnabled(perm && plugins);
     }
 
     useEffect(() => {
@@ -39,8 +54,22 @@ function Dashboard() {
         { path: `/servers/${serverName}/overview`, label: "Overview", icon: "fa-solid fa-house" },
         { path: `/servers/${serverName}/console`, label: "Console", icon: "fa-regular fa-file" },
         { path: `/servers/${serverName}/backups`, label: "Backups", icon: "fa-solid fa-clone" },
-        { path: `/servers/${serverName}/mods`, label: "Mods", icon: "fa-solid fa-puzzle-piece" }
     ];
+
+    if (modsEnabled) {
+        sidebarLinks.push({
+            path: `/servers/${serverName}/mods`,
+            label: "Mods",
+            icon: "fa-solid fa-puzzle-piece",
+        });
+    }
+    // if (pluginsEnabled) {
+    //     sidebarLinks.push({
+    //         path: `/servers/${serverName}/plugins`,
+    //         label: "Plugins",
+    //         icon: "fa-solid fa-puzzle-piece",
+    //     });
+    // }
 
     const navbarLinks = [
         { path: `/servers/`, label: "Servers", icon: "fa-solid fa-server" }

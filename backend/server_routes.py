@@ -83,6 +83,16 @@ def get_available_game_versions():
     versions = mcserver_maker.get_versions_available(new_server_type)
     return jsonify({"message": versions}), 200
 
+@server_routes.route('/<server>', methods=["GET"])
+@token_required
+@check_server_exists
+def get_server(server):
+    """
+    Returns server info: name, type, game version
+    """
+    server = servers.getServerByName(server)
+    return jsonify({"name": server.name, "type": server.server_type.name, "game_version": server.game_version})
+
 @server_routes.route('/<server>/status', methods=["GET"])
 @token_required
 @check_server_exists
@@ -281,7 +291,7 @@ def install_mod(server):
     return jsonify({"message": result[0]}), 200
 
 @server_routes.route('/<server>/mods/delete', methods=["POST"])
-@requiresUserPermissionLevel(permissions["delete_mod"])
+@requiresUserPermissionLevel(permissions["install_mod"])
 @check_server_exists
 def delete_mod(server):
     """Deletes a mod from the server."""

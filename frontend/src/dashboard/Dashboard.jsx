@@ -14,8 +14,6 @@ function Dashboard() {
     const location = useLocation();
 
     async function init() {
-        let modded = false;
-        let plugins = false;
         const response = await fetch(`${API_SERVER}/api/servers/${serverName}`, {
             headers: getAuthHeader()
         });

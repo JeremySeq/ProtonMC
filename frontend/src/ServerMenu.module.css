@@ -56,12 +56,13 @@
 
 .serverTag {
     color: var(--primary);
-    font-size: 12pt;
+    font-size: 11pt;
     margin-left: 10px;
     padding: 7px 15px;
     border-radius: 15px;
     background-color: var(--primary-bg);
     transition: all 0.15s;
+    letter-spacing: 1px;
 }
 
 .serverTable tr td:first-child:hover .serverTag {

@@ -17,20 +17,20 @@
     margin-left: 15px;
 }
 
-.serverTable td i:nth-child(2) {
+.serverTable td i:nth-of-type(2) {
     transform: scale(1) !important;
     float: right;
 }
 
-.stoppedServer td i:nth-child(2) {
+.stoppedServer td i:last-child {
     color: var(--error-text);
 }
 
-.startingServer td i:nth-child(2) {
+.startingServer td i:last-child {
     color: var(--warning-text);
 }
 
-.runningServer td i:nth-child(2) {
+.runningServer td i:last-child {
     color: var(--success-text);
 }
 
@@ -54,6 +54,21 @@
     transform: scale(1.025);
 }
 
+.serverTag {
+    color: var(--primary);
+    font-size: 12pt;
+    margin-left: 10px;
+    padding: 7px 15px;
+    border-radius: 15px;
+    background-color: var(--primary-bg);
+    transition: all 0.15s;
+}
+
+.serverTable tr td:first-child:hover .serverTag {
+    background-color: var(--primary-dark);
+    color: var(--black);
+}
+
 .inaccessibleServer {
     background-color: var(--warning-bg) !important;
     transition: all 0.15s;
@@ -69,6 +84,7 @@
 
 .deleteButton {
     width: 10px !important;
+    padding: 0 !important;
 }
 
 .deleteButton button {
@@ -76,6 +92,7 @@
     border: none;
     color: var(--gray);
     transition: all 200ms;
+    height: 30px !important;
 }
 
 .deleteButton button:hover {

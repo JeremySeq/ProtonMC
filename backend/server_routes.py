@@ -28,7 +28,13 @@ def check_server_exists(func):
 @token_required
 def get_servers():
     """Returns list of servers and their statuses"""
-    s = [{"name": server.name, "status": server.getServerStatus().value} for server in servers.servers]
+    s = [
+        {
+            "name": server.name,
+            "type": server.server_type.name,
+            "game_version": server.game_version,
+            "status": server.getServerStatus().value
+        } for server in servers.servers]
     for server_creating in servers.server_creation_threads.keys():
         s.append({"name": server_creating, "status": MCserver.ServerStatus.CREATING.value})
     return jsonify(s), 200

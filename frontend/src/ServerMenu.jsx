@@ -22,6 +22,13 @@ function ServerMenu() {
         setDeleteServerPopup(serverName)
     }
 
+    function getServerTags(server) {
+        return <>
+            <span className={styles.serverTag}>{server["type"]}</span>
+            <span className={styles.serverTag}>{server["game_version"]}</span>
+        </>
+    }
+
     const updateServers = async () => {
         const response = await fetch(API_SERVER + "/api/servers/", {
             headers: getAuthHeader()
@@ -29,42 +36,53 @@ function ServerMenu() {
         const serverList = await response.json();
         if (response.status === 200) {
             const listItems = serverList.map(server => {
-                    if (server["status"] === 3) {
-                        return <tr key={server["name"]} className={styles.inaccessibleServer}>
-                            <td><i className="fa-solid fa-server"></i>{server["name"]} - Creating... <div className={styles.loader}></div></td>
-                        </tr>
-                    } else if (server["status"] === 2) {
-                        return <tr key={server["name"]} className={styles.runningServer}>
-                            <td onClick={() => goToServer(server["name"])}><i
-                                className="fa-solid fa-server"></i>{server["name"]}<i
-                                className="fa-solid fa-circle"></i></td>
-                        </tr>
-                    } else if (server["status"] === 1) {
-                        return <tr key={server["name"]} className={styles.startingServer}>
-                            <td onClick={() => goToServer(server["name"])}><i
-                                className="fa-solid fa-server"></i>{server["name"]}<i
-                                className="fa-solid fa-circle"></i></td>
-                        </tr>
-                    }
+                let serverClass = '';
+                let content = (
+                    <td onClick={() => goToServer(server["name"])}>
+                        <i className="fa-solid fa-server"></i>{server["name"]} {getServerTags(server)}
+                        <i className="fa-solid fa-circle"></i>
+                    </td>
+                );
 
-                    if (serverCreationPermissions) {
-                        return <tr key={server["name"]} className={styles.stoppedServer}>
-                            <td onClick={() => goToServer(server["name"])}><i
-                                className="fa-solid fa-server"></i>{server["name"]}<i className="fa-solid fa-circle"></i>
+                switch (server["status"]) {
+                    case 3:
+                        serverClass = styles.inaccessibleServer;
+                        content = (
+                            <td>
+                                <i className="fa-solid fa-server"></i>{server["name"]} - Creating...
+                                <div className={styles.loader}></div>
                             </td>
-                            <td className={styles.deleteButton}>
-                                <button onClick={() => openDeleteServerPopup(server["name"])}><i
-                                    className="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    }
-                    return <tr key={server["name"]} className={styles.stoppedServer}>
-                        <td onClick={() => goToServer(server["name"])}><i
-                            className="fa-solid fa-server"></i>{server["name"]}<i className="fa-solid fa-circle"></i>
-                        </td>
-                    </tr>
+                        );
+                        break;
+                    case 2:
+                        serverClass = styles.runningServer;
+                        break;
+                    case 1:
+                        serverClass = styles.startingServer;
+                        break;
+                    default:
+                        serverClass = styles.stoppedServer;
+                        if (serverCreationPermissions) {
+                            return (
+                                <tr key={server["name"]} className={serverClass}>
+                                    {content}
+                                    <td className={styles.deleteButton}>
+                                        <button onClick={() => openDeleteServerPopup(server["name"])}>
+                                            <i className="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            );
+                        }
                 }
-            );
+
+                return (
+                    <tr key={server["name"]} className={serverClass}>
+                        {content}
+                    </tr>
+                );
+            });
+
             setServerHTML(listItems);
         } else if (response.status === 401) {
             navigate("/login");

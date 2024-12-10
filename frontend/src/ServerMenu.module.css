@@ -91,15 +91,22 @@
 .deleteButton button {
     background-color: transparent;
     border: none;
-    color: var(--gray);
     transition: all 200ms;
     height: 30px !important;
+}
+
+.deleteButton i {
+    color: var(--gray) !important;
+    transition: all 200ms;
+}
+
+.deleteButton button:hover i {
+    color: var(--error-text) !important;
 }
 
 .deleteButton button:hover {
     background-color: transparent;
     border: none;
-    color: var(--error-text);
     cursor: pointer;
 }
 

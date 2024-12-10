@@ -100,7 +100,13 @@ class MCserver:
         b = f'{self.backup_location}\\{month}-{day}-{year}_{hour}-{minute}'
         # os.mkdir(b)
 
-        self.zip_folder_for_backup(a, self.backup_location, f"{month}-{day}-{year}_{hour}-{minute}.zip")
+        try:
+            self.zip_folder_for_backup(a, self.backup_location, f"{month}-{day}-{year}_{hour}-{minute}.zip")
+        except FileNotFoundError:
+            # TODO: backup errors like this are not communicated to the frontend
+            print("Failed backup: FileNotFoundError")
+            self.backup_thread = None
+            return
 
         # self.copy(a, b)
         print("Done backup.")

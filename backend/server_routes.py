@@ -28,7 +28,13 @@ def check_server_exists(func):
 @token_required
 def get_servers():
     """Returns list of servers and their statuses"""
-    s = [{"name": server.name, "status": server.getServerStatus().value} for server in servers.servers]
+    s = [
+        {
+            "name": server.name,
+            "type": server.server_type.name,
+            "game_version": server.game_version,
+            "status": server.getServerStatus().value
+        } for server in servers.servers]
     for server_creating in servers.server_creation_threads.keys():
         s.append({"name": server_creating, "status": MCserver.ServerStatus.CREATING.value})
     return jsonify(s), 200
@@ -82,6 +88,16 @@ def get_available_game_versions():
 
     versions = mcserver_maker.get_versions_available(new_server_type)
     return jsonify({"message": versions}), 200
+
+@server_routes.route('/<server>', methods=["GET"])
+@token_required
+@check_server_exists
+def get_server(server):
+    """
+    Returns server info: name, type, game version
+    """
+    server = servers.getServerByName(server)
+    return jsonify({"name": server.name, "type": server.server_type.name, "game_version": server.game_version})
 
 @server_routes.route('/<server>/status', methods=["GET"])
 @token_required
@@ -214,8 +230,12 @@ def get_mods_list(server):
 @server_routes.route('/<server>/mods/search', methods=["GET", "POST"])
 @check_server_exists
 def search_mod(server):
-    """Searches for mods compatible with the server"""
+    """Searches for mods/plugins compatible with the server"""
     server = servers.getServerByName(server)
+
+    if server.getModType() == mod_helper.ModType.NONE:
+        return jsonify({"message": "Server does not support mods/plugins."}), 400
+
     query = request.form.get("query")
     platform = mod_helper.Platform.CURSEFORGE
     if request.form.get("platform") is not None:
@@ -223,12 +243,19 @@ def search_mod(server):
             platform = mod_helper.Platform[request.form.get("platform").upper()]
         except KeyError:
             pass
-    mod_loader = server.server_type.name.lower()
-    mods = None
-    if platform == mod_helper.Platform.CURSEFORGE:
-        mods = mod_helper.search_curseforge_mods(query, mod_loader=mod_loader, version=server.game_version)
-    else:
-        mods = mod_helper.search_modrinth_mods(query, mod_loader=mod_loader, version=server.game_version)
+
+    mods = []
+    if server.getModType() == mod_helper.ModType.MOD:
+        mod_loader = server.server_type.name.lower()
+        if platform == mod_helper.Platform.CURSEFORGE:
+            mods = mod_helper.search_curseforge_mods(query, mod_loader=mod_loader, version=server.game_version)
+        else:
+            mods = mod_helper.search_modrinth_mods(query, mod_loader=mod_loader, version=server.game_version)
+    elif server.getModType() == mod_helper.ModType.PLUGIN:
+        if platform == mod_helper.Platform.CURSEFORGE:
+            mods = mod_helper.search_curseforge_mods(query, project_type=mod_helper.ModType.PLUGIN)
+        else:
+            mods = mod_helper.search_modrinth_mods(query, project_type=mod_helper.ModType.PLUGIN)
 
     mods_json = []
     for mod in mods:
@@ -261,19 +288,28 @@ def install_mod(server):
             except KeyError:
                 pass
     project_id = request.form.get("project_id")
-    mods_folder = os.path.join(server.server_location, "mods")
 
-    result = None
-    if platform == mod_helper.Platform.CURSEFORGE:
-        result = mod_helper.download_curseforge_mod(
-            project_id, mods_folder,
-            server.server_type.name.lower(),
-            server.game_version if server.game_version else "")
+    if server.server_type == mod_helper.ModType.MOD:
+        mods_folder = os.path.join(server.server_location, "mods")
+
+        if platform == mod_helper.Platform.CURSEFORGE:
+            result = mod_helper.download_curseforge_mod(
+                project_id, mods_folder,
+                server.server_type.name.lower(),
+                server.game_version if server.game_version else "")
+        else:
+            result = mod_helper.download_modrinth_mod(
+                project_id, mods_folder,
+                server.server_type.name.lower(),
+                server.game_version if server.game_version else "")
     else:
-        result = mod_helper.download_modrinth_mod(
-            project_id, mods_folder,
-            server.server_type.name.lower(),
-            server.game_version if server.game_version else "")
+        plugins_folder = os.path.join(server.server_location, "plugins")
+        if platform == mod_helper.Platform.CURSEFORGE:
+            result = mod_helper.download_curseforge_plugin(
+                project_id, plugins_folder)
+        else:
+            result = mod_helper.download_modrinth_plugin(
+                project_id, plugins_folder)
 
     if result[1] != 200:
         return jsonify({"error": result[0]}), 500
@@ -281,13 +317,13 @@ def install_mod(server):
     return jsonify({"message": result[0]}), 200
 
 @server_routes.route('/<server>/mods/delete', methods=["POST"])
-@requiresUserPermissionLevel(permissions["delete_mod"])
+@requiresUserPermissionLevel(permissions["install_mod"])
 @check_server_exists
 def delete_mod(server):
     """Deletes a mod from the server."""
     server = servers.getServerByName(server)
     filename = request.form.get("filename")
-    path = os.path.join(server.server_location, "mods", filename)
+    path = os.path.join(server.server_location, "mods" if server.getModType() == mod_helper.ModType.MOD else "plugins", filename)
     try:
         os.remove(path)
     except FileNotFoundError:

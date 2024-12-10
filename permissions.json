@@ -3,6 +3,5 @@
     "view_console": 2,
     "send_command": 4,
     "create_backup": 2,
-    "install_mod": 4,
-    "delete_mod": 4
+    "install_mod": 4
 }

@@ -120,6 +120,11 @@
     flex-grow: 1; /* Allows the mod details to take up the available space */
 }
 
+.resultItem a {
+    color: var(--primary-light);
+    text-decoration: none;
+}
+
 .resultItem:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
@@ -187,7 +192,7 @@
 .modListItem button {
     color: var(--error-text);
     border: none;
-    background-color: var(--background);
+    background-color: transparent;
     justify-content: flex-end;
     transition: color .2s linear;
     scale: 1.3;

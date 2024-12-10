@@ -22,16 +22,23 @@ class Platform(Enum):
     CURSEFORGE = 1
     MODRINTH = 2
 
+class ModType(Enum):
+    """Mod Type"""
+    MOD = 1
+    PLUGIN = 2
+    NONE = 3
+
 class Mod():
     """Mod results from searches"""
 
-    def __init__(self, platform: Platform, project_id, name, author, downloads, logo):
+    def __init__(self, platform: Platform, project_id, name, author, downloads, logo, link):
         self.platform = platform
         self.project_id = project_id
         self.name = name
         self.author = author
         self.downloads = downloads
         self.logo = logo
+        self.link = link
 
     def __str__(self):
         return f"{self.name} by {self.author}"
@@ -45,7 +52,8 @@ class Mod():
             "name": self.name,
             "author": self.author,
             "downloads": self.downloads,
-            "logo": self.logo
+            "logo": self.logo,
+            "link": self.link
         }
 
 load_dotenv()
@@ -59,8 +67,9 @@ CURSEFORGE_API_KEY = curseforge_api_key
 GAME_ID = 432
 MODS_CATEGORY_ID = 6
 MODPACK_CATEGORY_ID = 4471
+PLUGINS_CATEGORY_ID = 5
 
-def search_modrinth_mods(search_query, mod_loader=None, version=None, project_type="mod", limit=40):
+def search_modrinth_mods(search_query, mod_loader=None, version=None, project_type=ModType.MOD, limit=40):
     """Searches Modrinth for mods"""
 
     url = 'https://api.modrinth.com/v2/search'
@@ -71,6 +80,10 @@ def search_modrinth_mods(search_query, mod_loader=None, version=None, project_ty
     if mod_loader:
         facets.append([f'categories:{mod_loader}'])
     if project_type:
+        if project_type == ModType.MOD:
+            project_type = "mod"
+        elif project_type == ModType.PLUGIN:
+            project_type = "plugin"
         facets.append([f'project_type:{project_type}'])
     facets = json.dumps(facets)
 
@@ -95,12 +108,13 @@ def search_modrinth_mods(search_query, mod_loader=None, version=None, project_ty
         author = mod_result["author"]
         downloads = mod_result["downloads"]
         logo = mod_result["icon_url"]
+        link = f"https://modrinth.com/{project_type}/{mod_result['slug']}"
 
-        search_results.append(Mod(Platform.MODRINTH, project_id, name, author, downloads, logo))
+        search_results.append(Mod(Platform.MODRINTH, project_id, name, author, downloads, logo, link))
 
     return search_results
 
-def search_curseforge_mods(search_query, mod_loader=None, version=None, project_type="mod", limit=40):
+def search_curseforge_mods(search_query, mod_loader=None, version=None, project_type=ModType.MOD, limit=40):
     """Searches Curseforge for mods"""
 
     headers = {
@@ -126,10 +140,12 @@ def search_curseforge_mods(search_query, mod_loader=None, version=None, project_
     if version:
         params["gameVersion"] = version
     if project_type:
-        if project_type == "mod":
+        if project_type == ModType.MOD:
             params["classId"] = MODS_CATEGORY_ID
-        elif project_type == "modpack":
-            params["classId"] = MODPACK_CATEGORY_ID
+        # elif project_type == "modpack":
+        #     params["classId"] = MODPACK_CATEGORY_ID
+        elif project_type == ModType.PLUGIN:
+            params["classId"] = PLUGINS_CATEGORY_ID
 
     url = 'https://api.curseforge.com/v1/mods/search'
     response = requests.get(url, params=params, headers = headers, timeout=4)
@@ -146,11 +162,58 @@ def search_curseforge_mods(search_query, mod_loader=None, version=None, project_
         name = mod_result["name"]
         author = mod_result["authors"][0]["name"]
         downloads = mod_result["downloadCount"]
-        logo = mod_result["logo"]["url"]
+        link = mod_result["links"]["websiteUrl"]
+        try:
+            logo = mod_result["logo"]["url"]
+        except TypeError:
+            logo = None
 
-        search_results.append(Mod(Platform.CURSEFORGE, project_id, name, author, downloads, logo))
+        search_results.append(Mod(Platform.CURSEFORGE, project_id, name, author, downloads, logo, link))
 
     return search_results
+
+def download_curseforge_plugin(project_id, destination_path):
+    """
+    Downloads a plugin from curseforge given its project id
+    to a destination path.
+    Returns [message, status_code]
+    """
+    headers = {
+        'Accept': 'application/json',
+        'x-api-key': CURSEFORGE_API_KEY
+    }
+
+    params = {
+    }
+
+    url = f'https://api.curseforge.com/v1/mods/{project_id}/files'
+
+    try:
+        r = requests.get(url, headers = headers, params=params, timeout=4)
+    except requests.exceptions.ReadTimeout:
+        return "Could not connect to Curseforge.", 500
+
+    if r.status_code != 200:
+        print("Request to " + url + " failed with status code " + str(r.status_code))
+        return "Could not connect to Curseforge.", 500
+
+    files_found = r.json()["data"]
+
+    if len(files_found) > 0:
+        # download the first file
+        filename = files_found[0]["fileName"]
+        download_url = files_found[0]["downloadUrl"]
+        response = requests.get(download_url, timeout=4)
+        if response.status_code == 200:
+            with open(os.path.join(destination_path, filename), 'wb') as file:
+                file.write(response.content)
+                print(f"Downloaded {filename}")
+            return "Downloaded plugin.", 200
+        else:
+            print(f"Failed to download {filename}")
+            return "Download failed.", 500
+    else:
+        return "No compatible files found.", 500
 
 def download_curseforge_mod(project_id, destination_path, mod_loader, minecraft_version):
     """Downloads a mod from Curseforge given its project id 
@@ -202,6 +265,48 @@ def download_curseforge_mod(project_id, destination_path, mod_loader, minecraft_
             return "Download failed.", 500
     else:
         return "No compatible files found.", 500
+
+def download_modrinth_plugin(project_id, destination_path):
+    """
+    Downloads a plugin from Modrinth given its project id
+    to a destination path.
+
+    Return [message, status_code]
+    """
+    url = f'https://api.modrinth.com/v2/project/{project_id}/version'
+
+    params = {
+        "loaders": f'["bukkit"]',
+    }
+
+    try:
+        r = requests.get(url, params=params, timeout=4)
+    except requests.exceptions.ReadTimeout:
+        return "Could not connect to Modrinth.", 500
+
+    if r.status_code != 200:
+        print("Request to " + url + " failed with status code " + str(r.status_code))
+        return "Could not connect to Modrinth.", 500
+
+    files_found = r.json()
+
+    if len(files_found) > 0:
+        # download the first file
+        file = files_found[0]["files"][0]
+        filename = file["filename"]
+        download_url = file["url"]
+        r = requests.get(download_url, timeout=4)
+        if r.status_code == 200:
+            with open(os.path.join(destination_path, filename), 'wb') as file:
+                file.write(r.content)
+                print(f"Downloaded {filename}")
+            return "Downloaded plugin.", 200
+        else:
+            print(f"Failed to download {filename}")
+            return "Download failed.", 500
+    else:
+        return "No compatible files found.", 500
+
 
 def download_modrinth_mod(project_id, destination_path, mod_loader, minecraft_version):
     """Downloads a mod from Modrinth given its project id 

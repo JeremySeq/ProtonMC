@@ -74,3 +74,42 @@ export async function getUserPermissionLevel() {
     }
   }
 }
+
+export async function userHasPermissionTo(action) {
+
+    let CACHE_PERMISSIONS = false;
+
+    if (CACHE_PERMISSIONS) {
+        var permission_cookie = getCookie("Permissions");
+
+        if (permission_cookie) {
+            let userInfo = JSON.parse(getCookie("Permissions"));
+            let permission_set = userInfo["permission_set"];
+            let permission_level = userInfo["permissions"];
+            return permission_level >= permission_set[action];
+        }
+    }
+
+    var token = getCookie("Authorization");
+
+    if (token) {
+        const response = await fetch(API_SERVER + "/api/login/", {
+            method: "GET",
+            headers: getAuthHeader()
+        });
+        const userInfo = await response.json();
+        if (response.status === 200) {
+            if (CACHE_PERMISSIONS) {
+                document.cookie = `Permissions=${JSON.stringify(userInfo)}; path=/`;
+            }
+            let permission_set = userInfo["permission_set"];
+            let permission_level = userInfo["permissions"];
+            return permission_level >= permission_set[action];
+        } else if (response.status === 401) {
+            return false;
+        } else {
+            console.log("Error code: " + response.status)
+            return false;
+        }
+    }
+}

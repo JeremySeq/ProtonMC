@@ -118,12 +118,18 @@ def asyncDeleteServer(name):
         except KeyError:
             pass
         server_folder = server.server_location
-        shutil.rmtree(server_folder)
+        try:
+            shutil.rmtree(server_folder)
+        except FileNotFoundError:
+            print("Could not find server folder.")
         server = getServerByName(name)
         servers.remove(server)
-        if len(os.listdir(server.backup_location)) == 0:
-            shutil.rmtree(server.backup_location)
-            print("Deleted empty server backups folder.")
+        try:
+            if len(os.listdir(server.backup_location)) == 0:
+                shutil.rmtree(server.backup_location)
+                print("Deleted empty server backups folder.")
+        except FileNotFoundError:
+            print("Could not find server backups folder.")
         setServerInfoToJson()
         print(f"Server \"{name}\" deleted successfully.")
         result[0] = True

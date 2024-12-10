@@ -1,19 +1,23 @@
-import os
-import shutil
-import psutil
 import datetime
-from queue import Queue, Empty
-import subprocess
-from threading import Thread
-import zipfile
-import time
-import threading
-from enum import Enum
-from util import *
-import progressbar
+import os
 import platform
-from server_types import ServerType
+import shutil
+import subprocess
+import threading
+import time
+import zipfile
+from enum import Enum
+from queue import Queue, Empty
+from threading import Thread
+
+import progressbar
+import psutil
+
 import extract_mod_info
+from server_types import ServerType
+import mod_helper
+from util import *
+
 
 class MCserver:
 
@@ -96,7 +100,13 @@ class MCserver:
         b = f'{self.backup_location}\\{month}-{day}-{year}_{hour}-{minute}'
         # os.mkdir(b)
 
-        self.zip_folder_for_backup(a, self.backup_location, f"{month}-{day}-{year}_{hour}-{minute}.zip")
+        try:
+            self.zip_folder_for_backup(a, self.backup_location, f"{month}-{day}-{year}_{hour}-{minute}.zip")
+        except FileNotFoundError:
+            # TODO: backup errors like this are not communicated to the frontend
+            print("Failed backup: FileNotFoundError")
+            self.backup_thread = None
+            return
 
         # self.copy(a, b)
         print("Done backup.")
@@ -459,21 +469,42 @@ class MCserver:
             return True
         return False
 
+    def getModType(self):
+        """
+        Returns either MODS, PLUGINS, or NONE
+        """
+
+        modded = [ServerType.FORGE, ServerType.NEOFORGE, ServerType.FABRIC]
+        plugin = [ServerType.SPIGOT]
+
+        if self.server_type in modded:
+            return mod_helper.ModType.MOD
+        elif self.server_type in plugin:
+            return mod_helper.ModType.PLUGIN
+        else:
+            return mod_helper.ModType.NONE
+
+
     def getModList(self):
         """Returns list of mods in the server's mods folder. 
         [(file_name, mod_name), etc.] where file_name is the jarfile name,
         and mod_name is the extracted mod name from the mod metadata"""
 
-        if not self.isModded():
-            return []
         results = []
-        mods_folder = os.path.join(self.server_location, "mods")
-        for dirpath, dirnames, filenames in os.walk(mods_folder):
-            for file in filenames:
-                path = os.path.join(dirpath, *dirnames, file)
+        mods_folder = os.path.join(
+            self.server_location,
+            "mods" if self.getModType() == mod_helper.ModType.MOD else "plugins"
+        )
+
+        for file in os.listdir(mods_folder):
+            path = os.path.join(mods_folder, file)
+            if os.path.isfile(path) and file.endswith(".jar"):
                 try:
                     mod_name = extract_mod_info.get_mod_name(path)
-                except:
+                except Exception as e:
+                    print(e)
                     print("Error while extracting mod metadata.")
+                    mod_name = file
                 results.append((file, mod_name))
+
         return results

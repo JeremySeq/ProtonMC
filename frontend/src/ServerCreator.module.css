@@ -27,7 +27,7 @@
     font-size: 20pt;
 }
 
-.container select, input {
+.container select, .container input {
     background-color: var(--bg);
     padding: 10px;
     color: var(--gray);
@@ -49,7 +49,7 @@
     cursor: pointer;
     outline: 2px solid var(--primary);
 }
-.container input:hover, input:focus {
+.container input:hover, .container input:focus {
     outline: 2px solid var(--primary);
 }
 

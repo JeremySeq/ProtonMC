@@ -185,10 +185,10 @@ function Overview() {
     return (
         <>
             <div className={styles.container}>
-                {/* <div className={`${styles.card} ${styles.spanCard}`}>
-                    <h2 className={styles.serverAddress}>jeremyseq.serveminecraft.net:25565</h2>
-                    <p className={styles.copyAddressButton}><i>Click to copy</i></p>
-                </div> */}
+                {/*<div className={`${styles.card} ${styles.spanCard}`}>*/}
+                {/*    <h2 className={styles.serverAddress}>some-random.com:25565</h2>*/}
+                {/*    <p className={styles.copyAddressButton}><i>Click to copy</i></p>*/}
+                {/*</div>*/}
 
                 <div className={styles.card}>
 
@@ -214,11 +214,11 @@ function Overview() {
                     
                     <div className={styles.playerList}>
                         
-                        {playerList.length === 0 ? <h3 class={styles.noPlayers}><i className="fa-solid fa-users-slash"></i></h3> : ""}
+                        {playerList.length === 0 ? <h3 className={styles.noPlayers}><i className="fa-solid fa-users-slash"></i></h3> : ""}
 
                         {playerList.map(player => (
-                            <div className={styles.playerElement}>
-                                <img class={styles.playerImg} src={`https://minotar.net/helm/${player}/100.png`} alt=""></img>
+                            <div key={player} className={styles.playerElement}>
+                                <img className={styles.playerImg} src={`https://minotar.net/helm/${player}/100.png`} alt=""></img>
                                 <p>{player}</p>
                             </div>
                         ))}

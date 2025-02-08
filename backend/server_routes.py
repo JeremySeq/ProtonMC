@@ -289,7 +289,7 @@ def install_mod(server):
                 pass
     project_id = request.form.get("project_id")
 
-    if server.server_type == mod_helper.ModType.MOD:
+    if server.getModType() == mod_helper.ModType.MOD:
         mods_folder = os.path.join(server.server_location, "mods")
 
         if platform == mod_helper.Platform.CURSEFORGE:

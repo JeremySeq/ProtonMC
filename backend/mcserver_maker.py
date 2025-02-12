@@ -101,7 +101,7 @@ def edit_forge_run_scripts(server_folder, jdk_path):
         with open(file_path, 'w') as file:
             for line in lines:
                 if line.strip().startswith("java"):
-                    line = line.replace("java", java_path, 1)
+                    line = line.replace("java", '"' + java_path + '"', 1)
                 file.write(line)
         print("Java path replacement complete for run.sh.")
     except FileNotFoundError:
@@ -119,7 +119,7 @@ def edit_forge_run_scripts(server_folder, jdk_path):
         with open(file_path, 'w') as file:
             for line in lines:
                 if line.strip().startswith("java"):
-                    line = line.replace("java", java_path, 1)
+                    line = line.replace("java", '"' + java_path + '"', 1)
                 if line.strip().startswith("pause"):
                     line = ""
                 file.write(line)

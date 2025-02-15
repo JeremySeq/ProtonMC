@@ -174,9 +174,17 @@
 }
 
 .deleteServerPopup input {
-    outline-color: var(--error-text);
+    border: none;
+    border-radius: 5px;
+    outline: 1px solid var(--error-text);
     color: var(--white);
     margin-bottom: 20px;
+    background-color: var(--light-bg);
+    padding: 10px;
+    font-size: 14pt;
+}
+.deleteServerPopup input:focus {
+    outline: 2px solid var(--error-text);
 }
 
 .deleteServerPopup button {

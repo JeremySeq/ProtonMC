@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import styles from './Backups.module.css';
 import API_SERVER from '../Constants';
 import { getAuthHeader } from '../AuthorizationHelper';
@@ -14,6 +14,7 @@ function Backups() {
 
     const { addNotification } = useNotification();
     const { serverName } = useParams();
+    const navigate = useNavigate();
 
     async function updateBackupList() {
         const response = await fetch(API_SERVER + "/api/servers/" + serverName + "/backup", {
@@ -24,7 +25,7 @@ function Backups() {
         if (response.status == 200) {
             setBackupList(backupListResponse);
         } else if (response.status == 401) {
-            alert("You are not logged in.")
+            navigate("/login")
         } else {
             console.log("Error")
         }
@@ -50,7 +51,7 @@ function Backups() {
         if (response.status == 200) {
             setBackupInProgress(true);
         } else if (response.status == 401) {
-            alert("You are not logged in.")
+            navigate("/login")
         } else {
             console.log("Error")
         }
@@ -75,7 +76,7 @@ function Backups() {
                 setBackupProgress(0);
             }
         } else if (response.status == 401) {
-            alert("You are not logged in.")
+            navigate("/login")
         } else {
             console.log("Error")
         }

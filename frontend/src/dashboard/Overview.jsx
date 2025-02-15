@@ -53,7 +53,7 @@ function Overview() {
         if (response.status == 200) {
             setServerStartTime(serverStartTimeResponse["message"]);
         } else if (response.status == 401) {
-            alert("You are not logged in.")
+            navigate("/login");
         } else {
             console.log("Error")
         }
@@ -68,7 +68,7 @@ function Overview() {
         if (response.status == 200) {
             setPlayerList(playersOnlineResponse["players"]);
         } else if (response.status == 401) {
-            alert("You are not logged in.")
+            navigate("/login")
         } else {
             console.log("Error")
         }
@@ -83,7 +83,7 @@ function Overview() {
             queryStatus();
             updateServerStartTime();
         } else if (response.status == 401) {
-            alert("You are not logged in.")
+            navigate("/login")
         } else {
             console.log("Error")
         }
@@ -97,7 +97,7 @@ function Overview() {
         if (response.status == 200) {
             queryStatus();
         } else if (response.status == 401) {
-            alert("You are not logged in.")
+            navigate("/login")
         } else {
             console.log("Error")
         }

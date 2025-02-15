@@ -86,7 +86,7 @@ function ServerMenu() {
             setServerHTML(listItems);
         } else if (response.status === 401) {
             navigate("/login");
-            // alert("You are not logged in.")
+            // navigate("/login")
         } else {
             console.log("Error")
         }

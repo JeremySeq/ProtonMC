@@ -79,7 +79,7 @@ function ServerCreator() {
             navigate("/servers");
         } else if (response.status === 401) {
             navigate("/login");
-            alert("You are not logged in.");
+            navigate("/login");
         } else {
             console.log("Error: " + json["message"]);
         }

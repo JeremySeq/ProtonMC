@@ -26,7 +26,7 @@ function Dashboard() {
                 setPluginsEnabled(true);
             }
         } else if (response.status === 401) {
-            alert("You are not logged in.");
+            navigate("/login");
         } else if (response.status === 404) {
             alert("This server does not exist.");
             navigate("/servers");

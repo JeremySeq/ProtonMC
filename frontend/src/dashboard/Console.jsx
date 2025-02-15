@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import styles from './Console.module.css';
 import API_SERVER from '../Constants';
 import { getAuthHeader } from '../AuthorizationHelper';
@@ -10,6 +10,7 @@ function Console() {
     const { serverName } = useParams();
 
     const { addNotification } = useNotification();
+    const navigate = useNavigate();
 
     function escapeHtml(unsafe) {
         return unsafe
@@ -39,7 +40,7 @@ function Console() {
             var newServerConsole = newServerConsoleList.join('\n');
             updateConsoleContent(addItalicsForTags(newServerConsole));
         } else if (response.status === 401) {
-            alert("You are not logged in.");
+            navigate("/login");
         } else {
             console.log("Error");
         }
@@ -87,7 +88,7 @@ function Console() {
                 addNotification("Couldn't send command. Server is offline.", "error");
             }
         } else if (response.status === 401) {
-            alert("You are not logged in.");
+            navigate("/login");
         } else if (response.status === 403) {
             addNotification("You don't have permission to send commands.", "warning");
         } else {

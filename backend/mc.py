@@ -16,22 +16,25 @@ import psutil
 import extract_mod_info
 from server_types import ServerType
 import mod_helper
+from notify import ServerEvent, NotifyBot
 from util import *
 
 
 class MCserver:
-
     class ServerStatus(Enum):
         STOPPED = 0
         STARTING = 1
         RUNNING = 2
         CREATING = 3
 
-    def __init__(self, name, server_type, server_location, backup_location, game_version=None):
+    def __init__(self, name, server_type, server_location, backup_location, notify_bot=None, game_version=None):
         self.server_type = server_type
         self.game_version = game_version
         self.server_location = server_location
         self.backup_location = backup_location
+        if notify_bot is None:
+            notify_bot = NotifyBot(None, None)
+        self.notify_bot = notify_bot
         # create backup folder for server if necessary
         try:
             os.mkdir(self.backup_location)
@@ -52,7 +55,7 @@ class MCserver:
 
     def __str__(self):
         return self.name
-    
+
     def async_create_backup_directory(self):
         def try_mkdir():
             try:
@@ -61,7 +64,7 @@ class MCserver:
                 pass
             except FileNotFoundError:
                 print(f"Could not find backup folder for server: {self.name}.")
-        
+
         thread = threading.Thread(target=try_mkdir)
         thread.daemon = True
         thread.start()
@@ -76,14 +79,14 @@ class MCserver:
         print(command)
         self.command_queue.put(command)
         return True
-    
+
     def getBackupProgress(self) -> list[bool, int]:
         if self.backup_thread is None:
             return False, 0
         if self.backup_thread.is_alive:
             return True, self.backup_progress
         return False, 0
-    
+
     def startBackup(self):
         self.backup_thread = Thread(target=self.backupBlocking)
         # self.backup_thread.daemon = True
@@ -127,13 +130,13 @@ class MCserver:
         total_size_mb = total_size / (1024 * 1024)
 
         widgets = [' [',
-                progressbar.Timer(format= 'Elapsed Time: %(elapsed)s'),
-                '] ',
-                progressbar.Bar('*'),' (',
-                progressbar.ETA(), ') ',
-        ]
-        bar = progressbar.ProgressBar(max_value=total_size_mb, 
-                                    widgets=widgets).start()
+                   progressbar.Timer(format='Elapsed Time: %(elapsed)s'),
+                   '] ',
+                   progressbar.Bar('*'), ' (',
+                   progressbar.ETA(), ') ',
+                   ]
+        bar = progressbar.ProgressBar(max_value=total_size_mb,
+                                      widgets=widgets).start()
 
         # Create a zip file
         with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -220,7 +223,7 @@ class MCserver:
     def getBackups(self):
 
         files = os.listdir(self.backup_location)
-        
+
         stripped = []
         for file in files:
             stripped.append(file.removesuffix('.zip'))
@@ -318,7 +321,7 @@ class MCserver:
         if self.subprocess.poll() is None:
             return True
         return False
-    
+
     # different than isServerRunning() because it checks if the server has finished startup and can be joined
     def isServerOperational(self) -> bool:
         if not self.isServerRunning():
@@ -329,23 +332,23 @@ class MCserver:
             for line in self.console:
                 if "[Server thread/INFO]" in line and "Done" in line:
                     self.is_operational = True
+                    self.notify_bot.notify(ServerEvent.SERVER_STARTED, self.name)
                     return True
             return False
         return False
-    
+
     def getServerStatus(self):
         running = self.isServerRunning()
         operational = self.isServerOperational()
-        
+
         if not running:
             return MCserver.ServerStatus.STOPPED
-        
+
         if not operational:
             return MCserver.ServerStatus.STARTING
-        
+
         return MCserver.ServerStatus.RUNNING
 
-    
     def getStartTime(self):
         if not self.isServerRunning():
             return False
@@ -373,17 +376,18 @@ class MCserver:
         minutes, seconds = divmod(remainder, 60)
 
         return f"{hours}:{minutes:02}:{seconds:02}"
-    
+
     def startServerBlocking(self):
+
+        self.notify_bot.notify(ServerEvent.SERVER_STARTING, self.name)
 
         # clear console: this is necessary so that isServerOperational doesn't find "Done" in the console from the previous run
         self.console.clear()
-        
+
         self.players.clear()
 
         # set operational status as false in case it was true before
         self.is_operational = False
-
 
         # Use run.bat or run.sh file (depending on the operating system)
         system = platform.system()
@@ -394,17 +398,17 @@ class MCserver:
             self.subprocess = subprocess.Popen(
                 [serverRunPath, "nogui"],
                 cwd=self.server_location,
-                stdin=subprocess.PIPE, 
+                stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT
             )
-        else: # linux/mac: run.sh
+        else:  # linux/mac: run.sh
             serverRunPath = os.path.join(self.server_location, "run.sh")
 
             self.subprocess = subprocess.Popen(
                 ["sh", serverRunPath, "nogui"],
                 cwd=self.server_location,
-                stdin=subprocess.PIPE, 
+                stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT
             )
@@ -445,12 +449,19 @@ class MCserver:
                             text_after_tags = getTextAfterTags(line)
                             if didPlayerJoin(text_after_tags):
                                 self.players.append(didPlayerJoin(text_after_tags))
+
+                                self.notify_bot.notify(ServerEvent.PLAYER_JOIN, didPlayerJoin(text_after_tags))
                                 print("PLAYER JOINED:", didPlayerJoin(text_after_tags))
                             if didPlayerLeave(text_after_tags):
                                 if didPlayerLeave(text_after_tags) in self.players:
                                     self.players.remove(didPlayerLeave(text_after_tags))
-                                    
+
+                                self.notify_bot.notify(ServerEvent.PLAYER_LEAVE, didPlayerLeave(text_after_tags))
                                 print("PLAYER LEFT:", didPlayerLeave(text_after_tags))
+
+                            if didPlayerGotAchivement(text_after_tags) is not None:
+                                self.notify_bot.notify(ServerEvent.PLAYER_ACHIEVEMENT,
+                                                       *didPlayerGotAchivement(text_after_tags))
 
                         line = hideIPIfPlayerJoined(line)
                         self.console.append(line.strip())
@@ -462,6 +473,8 @@ class MCserver:
                 print("Thread did not terminate in time, forcefully terminating.")
             else:
                 print("Thread joined, server blocking method exiting.")
+
+            self.notify_bot.notify(ServerEvent.SERVER_STOPPED, self.name)
 
     def isModded(self):
         modded = [ServerType.FORGE, ServerType.NEOFORGE, ServerType.FABRIC]
@@ -483,7 +496,6 @@ class MCserver:
             return mod_helper.ModType.PLUGIN
         else:
             return mod_helper.ModType.NONE
-
 
     def getModList(self):
         """Returns list of mods in the server's mods folder. 

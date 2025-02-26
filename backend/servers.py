@@ -1,10 +1,11 @@
-import os
-from enum import Enum
 import json
-from threading import Thread
+import os
 import shutil
+from threading import Thread
+
 import mc
 import mcserver_maker
+from notify import NotifyBot
 from server_types import ServerType
 
 serversJson = "servers.json"
@@ -15,6 +16,7 @@ server_creation_threads = {}
 
 servers_folder = None
 backups_folder = None
+
 
 def initServers():
     # gets server info from json, puts it as mc.MCserver objects into servers list
@@ -51,17 +53,27 @@ def initServers():
             game_version = server_data["game_version"]
         except KeyError:
             pass
+
+        notify_bot = None
+        try:
+            notify_bot_settings = server_data["notify_bot_settings"]
+            notify_bot = NotifyBot(*notify_bot_settings)
+        except KeyError:
+            pass
+
         server_info.append(mc.MCserver(server_name, server_type, server_folder,
-                                       backup_folder, game_version=game_version))
+                                       backup_folder, notify_bot=notify_bot, game_version=game_version))
 
     global servers
     servers = server_info
+
 
 def getServerByName(name) -> mc.MCserver | None:
     for server in servers:
         if server.name == name:
             return server
     return None
+
 
 def setServerInfoToJson():
     servers_list = {}
@@ -72,25 +84,25 @@ def setServerInfoToJson():
         backup_folder = server.backup_location
         server_type = server.server_type.name
         game_version = server.game_version
+        notify_bot = server.notify_bot
+
+        servers_list[server_name] = {
+            "server_type": server_type,
+            "server_folder": server_folder,
+            "backup_folder": backup_folder,
+        }
 
         if game_version is not None:
-            servers_list[server_name] = {
-                "server_type": server_type,
-                "server_folder": server_folder,
-                "backup_folder": backup_folder,
-                "game_version": game_version
-            }
-        else:
-            servers_list[server_name] = {
-                "server_type": server_type,
-                "server_folder": server_folder,
-                "backup_folder": backup_folder,
-            }
+            servers_list[server_name]["game_version"] = game_version
 
-    server_info = {"servers_folder": servers_folder, "backups_folder": backups_folder,"servers_list": servers_list}        
+        if notify_bot is not None:
+            servers_list[server_name]["notify_bot_settings"] = notify_bot.get_settings()
+
+    servers_info = {"servers_folder": servers_folder, "backups_folder": backups_folder, "servers_list": servers_list}
 
     with open(serversJson, 'w', encoding='utf-8') as json_file:
-        json.dump(server_info, json_file, indent=4)
+        json.dump(servers_info, json_file, indent=4)
+
 
 def asyncCreateServer(name, server_type: ServerType, game_version: str):
     def createServer(name, server_type: ServerType, game_version: str):
@@ -98,16 +110,20 @@ def asyncCreateServer(name, server_type: ServerType, game_version: str):
         server_creation_threads.pop(name)
         if not server_folder:
             return None
-        servers.append(mc.MCserver(name, server_type, server_folder, os.path.join(backups_folder, name), game_version=game_version))
+        servers.append(mc.MCserver(name, server_type, server_folder, os.path.join(backups_folder, name),
+                                   game_version=game_version))
         setServerInfoToJson()
         return getServerByName(name)
+
     creation_thread = Thread(target=createServer, args=(name, server_type, game_version))
     creation_thread.start()
     server_creation_threads[name] = creation_thread
 
+
 def asyncDeleteServer(name):
     print(f"Deleting server {name}...")
     result = [None]
+
     def asyncDeleteServer():
         server = getServerByName(name)
         if server is None:
@@ -134,9 +150,10 @@ def asyncDeleteServer(name):
         print(f"Server \"{name}\" deleted successfully.")
         result[0] = True
         return True
-    
+
     thread = Thread(target=asyncDeleteServer)
     thread.start()
+
 
 if __name__ == '__main__':
     initServers()

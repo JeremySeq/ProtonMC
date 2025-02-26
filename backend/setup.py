@@ -38,12 +38,14 @@ def create_default_users_json():
     print("Username: " + Fore.CYAN + "admin" + Style.RESET_ALL)
     print("Password: " + Fore.CYAN + "admin123" + Style.RESET_ALL)
 
+
 def create_default_env_file():
     """Creates the default .env file with a SECRET_KEY."""
     secret_key = secrets.token_hex(16)
     with open(ENV_FILE, "w", encoding="utf-8") as file:
         file.write(f"SECRET_KEY=\"{secret_key}\"\n")
     print(f"{ENV_FILE} created with a generated SECRET_KEY.")
+
 
 def ask_for_curseforge_api_key():
     """Prompts the user for the CurseForge API key and saves it to .env."""
@@ -53,6 +55,12 @@ def ask_for_curseforge_api_key():
     load_dotenv()  # Load existing .env to set the key properly
     set_key(ENV_FILE, 'CURSEFORGE_API_KEY', cf_api_key)
     print("CURSEFORGE_API_KEY has been set in the .env file.")
+
+
+def save_lang():
+    load_dotenv()
+    set_key(ENV_FILE, 'LANG', "EN")
+
 
 def verify_json_file(file_path, create_default_func):
     """Checks if a JSON file exists and is valid, or creates it."""
@@ -68,6 +76,7 @@ def verify_json_file(file_path, create_default_func):
             create_default_func()
         else:
             print(f"{file_path} is all good!")
+
 
 def verify_env_file():
     """Checks if the .env file exists and has a valid SECRET_KEY."""
@@ -85,6 +94,7 @@ def verify_env_file():
         else:
             print("SECRET_KEY is all good!")
 
+
 def verify_curseforge_api_key():
     """Checks if CURSEFORGE_API_KEY exists in the .env file."""
     load_dotenv()
@@ -95,6 +105,7 @@ def verify_curseforge_api_key():
         ask_for_curseforge_api_key()  # Ask user to provide the key
     else:
         print("CURSEFORGE_API_KEY is all good!")
+
 
 if __name__ == "__main__":
     # Verify and create all necessary files if they don't exist

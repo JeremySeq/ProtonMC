@@ -1,0 +1,10 @@
+{
+
+  "server_event.server_starting": "Server \"{}\" starting",
+  "server_event.server_started": "Server \"{}\" started",
+  "server_event.server_stopped": "Server \"{}\" stopped",
+  "server_event.player_join": "Player {} join",
+  "server_event.player_leave": "Player {} leave",
+  "server_event.player_achievement": "Player {} got achievement \"{}\"",
+  "server_event.player_death": "{}"
+}

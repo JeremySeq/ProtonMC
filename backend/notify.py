@@ -1,46 +1,34 @@
-from enum import IntEnum, IntFlag
+import json
+import os
+from enum import IntFlag, StrEnum
 
 import telebot
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
 lang = os.getenv("LANG")
 
+# load language dict
+lang_file_path = os.path.join(os.getcwd(), "backend", "lang", lang + ".json")
+if not os.path.exists(lang_file_path):
+    raise FileNotFoundError("Could not find lang file. Check .env LANG property.")
+with open(lang_file_path) as lang_file:
+    language_dict = json.load(lang_file)
 
-class ServerEvent(IntEnum):
-    SERVER_STARTING = 1
-    SERVER_STARTED = 2
-    SERVER_STOPPED = 3
-    PLAYER_JOIN = 4
-    PLAYER_LEAVE = 5
-    PLAYER_ACHIEVEMENT = 6
-    PLAYER_DEATH = 7
+class ServerEvent(StrEnum):
+    SERVER_STARTING = "server_starting"
+    SERVER_STARTED = "server_started"
+    SERVER_STOPPED = "server_stopped"
+    PLAYER_JOIN = "player_join"
+    PLAYER_LEAVE = "player_leave"
+    PLAYER_ACHIEVEMENT = "player_achievement"
+    PLAYER_DEATH = "player_death"
 
 
 class NotifyMode(IntFlag):
     SERVER_EVENTS = 1
     PLAYER_CONN_EVENTS = 2
     PLAYER_OTHER_EVENTS = 4
-
-
-local_dict = {'EN': {
-    ServerEvent.SERVER_STARTING: 'Server "{}" starting',
-    ServerEvent.SERVER_STARTED: 'Server "{}" started',
-    ServerEvent.SERVER_STOPPED: 'Server "{}" stopped',
-    ServerEvent.PLAYER_JOIN: 'Player {} join',
-    ServerEvent.PLAYER_LEAVE: 'Player {} leave',
-    ServerEvent.PLAYER_ACHIEVEMENT: 'Player {} got achievement "{}"',
-    ServerEvent.PLAYER_DEATH: '{}'
-}, 'RU': {
-    ServerEvent.SERVER_STARTING: 'Сервер "{}" запускается',
-    ServerEvent.SERVER_STARTED: 'Сервер "{}" запущен',
-    ServerEvent.SERVER_STOPPED: 'Сервер "{}" остановлен',
-    ServerEvent.PLAYER_JOIN: 'Игрок {} присоединился',
-    ServerEvent.PLAYER_LEAVE: 'Игрок {} покинул игру',
-    ServerEvent.PLAYER_ACHIEVEMENT: 'Игрок {} получил достижение "{}"',
-    ServerEvent.PLAYER_DEATH: '{}'
-}}
 
 
 class NotifyBot:
@@ -75,7 +63,11 @@ class NotifyBot:
                 self.__send_message(event, *args)
 
     def __send_message(self, event, *args):
-        if self.__token is None or self.__token == "":
-            return
+        try:
+            if self.__token is None or self.__token == "":
+                return
 
-        self._bot.send_message(self.chat_id, local_dict[lang][event].format(*args))
+            self._bot.send_message(self.chat_id, language_dict["server_event." + event.value].format(*args))
+        except Exception as e:
+            print(e)
+            print("Failed to send Telegram message. Ignoring.")

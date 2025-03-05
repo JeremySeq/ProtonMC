@@ -4,6 +4,7 @@ import secrets
 
 from colorama import Fore, Style
 from dotenv import load_dotenv, set_key
+import servers
 
 # File paths
 SERVERS_JSON = 'servers.json'
@@ -14,8 +15,8 @@ ENV_FILE = 'backend/.env'
 def create_default_servers_json():
     """Creates the default servers.json file."""
     default_servers_data = {
-        "servers_folder": os.path.join(os.getcwd(), "servers"),
-        "backups_folder": os.path.join(os.getcwd(), "backups"),
+        "servers_folder": servers.RUN_PATH_SHORTCUT + "\\servers",
+        "backups_folder": servers.RUN_PATH_SHORTCUT + "\\backups",
         "servers_list": {}
     }
     with open(SERVERS_JSON, "w", encoding="utf-8") as file:

@@ -10,12 +10,43 @@ from server_types import ServerType
 
 serversJson = "servers.json"
 
+INSTALL_PATH = str(os.getcwd())  # actual installation path
+
+
+RUN_PATH_SHORTCUT = "<run_path>"  # character to represent the installation path
+SERVERS_FOLDER_SHORTCUT = "<servers_folder" # character to represent the main path
+# for example, if a server is in the overall servers folder, its path would just be "+\\<servername>"
+BACKUPS_FOLDER_SHORTCUT = "<backups_folder>"
+
 # data from the servers.json file
 servers = []
 server_creation_threads = {}
 
-servers_folder = None
-backups_folder = None
+servers_folder = ""
+backups_folder = ""
+
+
+def full_to_short(full_path: str, run_path_only=False) -> str:
+    """Converts a full path to a short path by replacing the installation path with a shortcut."""
+    if not run_path_only:
+        if os.path.abspath(full_path).startswith(os.path.abspath(servers_folder)):
+            return SERVERS_FOLDER_SHORTCUT + os.path.abspath(full_path)[len(os.path.abspath(servers_folder)):]
+        if os.path.abspath(full_path).startswith(os.path.abspath(backups_folder)):
+            return BACKUPS_FOLDER_SHORTCUT + os.path.abspath(full_path)[len(os.path.abspath(backups_folder)):]
+    if os.path.abspath(full_path).startswith(os.path.abspath(INSTALL_PATH)):
+        return RUN_PATH_SHORTCUT + os.path.abspath(full_path)[len(os.path.abspath(INSTALL_PATH)):]
+    return full_path  # Return as is if not within the installation path
+
+
+def short_to_full(short_path: str) -> str:
+    """Converts a short path back to a full path by replacing the shortcut with the installation path."""
+    if short_path.startswith(SERVERS_FOLDER_SHORTCUT):
+        return os.path.abspath(servers_folder) + short_path[len(SERVERS_FOLDER_SHORTCUT):]
+    if short_path.startswith(BACKUPS_FOLDER_SHORTCUT):
+        return os.path.abspath(backups_folder) + short_path[len(BACKUPS_FOLDER_SHORTCUT):]
+    if short_path.startswith(RUN_PATH_SHORTCUT):
+        return os.path.abspath(INSTALL_PATH) + short_path[len(RUN_PATH_SHORTCUT):]
+    return short_path  # Return as is if it doesn't use the shortcut
 
 
 def initServers():
@@ -24,10 +55,10 @@ def initServers():
     data = json.load(file)
 
     global servers_folder
-    servers_folder = data["servers_folder"]
+    servers_folder = short_to_full(data["servers_folder"])
 
     global backups_folder
-    backups_folder = data["backups_folder"]
+    backups_folder = short_to_full(data["backups_folder"])
     # create main backup folder if necessary
     try:
         os.mkdir(backups_folder)
@@ -45,8 +76,8 @@ def initServers():
             server_type = ServerType[server_data["server_type"]]
         except KeyError:
             pass
-        server_folder = server_data["server_folder"]
-        backup_folder = server_data["backup_folder"]
+        server_folder = short_to_full(server_data["server_folder"])
+        backup_folder = short_to_full(server_data["backup_folder"])
 
         game_version = None
         try:
@@ -88,8 +119,8 @@ def setServerInfoToJson():
 
         servers_list[server_name] = {
             "server_type": server_type,
-            "server_folder": server_folder,
-            "backup_folder": backup_folder,
+            "server_folder": full_to_short(server_folder),
+            "backup_folder": full_to_short(backup_folder),
         }
 
         if game_version is not None:
@@ -98,7 +129,8 @@ def setServerInfoToJson():
         if notify_bot is not None:
             servers_list[server_name]["notify_bot_settings"] = notify_bot.get_settings()
 
-    servers_info = {"servers_folder": servers_folder, "backups_folder": backups_folder, "servers_list": servers_list}
+    servers_info = {"servers_folder": full_to_short(servers_folder, run_path_only=True),
+                    "backups_folder": full_to_short(backups_folder, run_path_only=True), "servers_list": servers_list}
 
     with open(serversJson, 'w', encoding='utf-8') as json_file:
         json.dump(servers_info, json_file, indent=4)

@@ -60,7 +60,7 @@ load_dotenv()
 curseforge_api_key = os.getenv("CURSEFORGE_API_KEY")
 if curseforge_api_key is None:
     print("Add the CURSEFORGE_API_KEY variable to your .env file.")
-    sys.exit()
+    curseforge_api_key = ""
 
 CURSEFORGE_API_KEY = curseforge_api_key
 

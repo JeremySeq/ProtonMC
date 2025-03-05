@@ -46,7 +46,8 @@ local_dict = {'EN': {
 class NotifyBot:
     def __init__(self, token, chat_id, notify_mode=None):
         self.__token = token
-        self._bot = telebot.TeleBot(self.__token)
+        if token is not None:
+            self._bot = telebot.TeleBot(self.__token)
         self.chat_id = chat_id
 
         if notify_mode is None:

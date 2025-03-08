@@ -1,3 +1,44 @@
+.userProfile {
+    position: absolute;
+    font-family: "Jetbrains Mono", monospace;
+    font-size: 16pt;
+    top: 0;
+    left: 100%;
+    transform: translateX(-100%);
+    padding: 20px;
+    width: max-content;
+    user-select: none;
+}
+
+.username {
+    cursor: pointer;
+    transition: 100ms linear;
+    text-align: center;
+}
+.username:hover {
+    color: var(--primary);
+}
+
+.userProfileDropdown {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: opacity 100ms linear;
+}
+.userProfileDropdown button {
+    background-color: transparent;
+    border: none;
+    color: var(--white);
+    font-family: "Jetbrains Mono", monospace;
+    font-size: 14pt;
+    cursor: pointer;
+}
+
+.userProfileDropdown button:hover {
+    color: var(--primary);
+}
+
 .serverTable {
     position: relative;
     font-family: "Roboto", sans-serif;

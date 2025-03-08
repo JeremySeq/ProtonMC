@@ -1,20 +1,48 @@
-import os
-from enum import Enum
 import json
-from threading import Thread
+import os
 import shutil
+from threading import Thread
+
 import mc
 import mcserver_maker
+from notify import NotifyBot
 from server_types import ServerType
+from setup import SERVERS_FOLDER_SHORTCUT, BACKUPS_FOLDER_SHORTCUT, RUN_PATH_SHORTCUT
 
 serversJson = "servers.json"
+
+INSTALL_PATH = str(os.getcwd())  # actual installation path
 
 # data from the servers.json file
 servers = []
 server_creation_threads = {}
 
-servers_folder = None
-backups_folder = None
+servers_folder = ""
+backups_folder = ""
+
+
+def full_to_short(full_path: str, run_path_only=False) -> str:
+    """Converts a full path to a short path by replacing the installation path with a shortcut."""
+    if not run_path_only:
+        if os.path.abspath(full_path).startswith(os.path.abspath(servers_folder)):
+            return SERVERS_FOLDER_SHORTCUT + os.path.abspath(full_path)[len(os.path.abspath(servers_folder)):]
+        if os.path.abspath(full_path).startswith(os.path.abspath(backups_folder)):
+            return BACKUPS_FOLDER_SHORTCUT + os.path.abspath(full_path)[len(os.path.abspath(backups_folder)):]
+    if os.path.abspath(full_path).startswith(os.path.abspath(INSTALL_PATH)):
+        return RUN_PATH_SHORTCUT + os.path.abspath(full_path)[len(os.path.abspath(INSTALL_PATH)):]
+    return full_path  # Return as is if not within the installation path
+
+
+def short_to_full(short_path: str) -> str:
+    """Converts a short path back to a full path by replacing the shortcut with the installation path."""
+    if short_path.startswith(SERVERS_FOLDER_SHORTCUT):
+        return os.path.abspath(servers_folder) + short_path[len(SERVERS_FOLDER_SHORTCUT):]
+    if short_path.startswith(BACKUPS_FOLDER_SHORTCUT):
+        return os.path.abspath(backups_folder) + short_path[len(BACKUPS_FOLDER_SHORTCUT):]
+    if short_path.startswith(RUN_PATH_SHORTCUT):
+        return os.path.abspath(INSTALL_PATH) + short_path[len(RUN_PATH_SHORTCUT):]
+    return short_path  # Return as is if it doesn't use the shortcut
+
 
 def initServers():
     # gets server info from json, puts it as mc.MCserver objects into servers list
@@ -22,10 +50,10 @@ def initServers():
     data = json.load(file)
 
     global servers_folder
-    servers_folder = data["servers_folder"]
+    servers_folder = short_to_full(data["servers_folder"])
 
     global backups_folder
-    backups_folder = data["backups_folder"]
+    backups_folder = short_to_full(data["backups_folder"])
     # create main backup folder if necessary
     try:
         os.mkdir(backups_folder)
@@ -43,25 +71,35 @@ def initServers():
             server_type = ServerType[server_data["server_type"]]
         except KeyError:
             pass
-        server_folder = server_data["server_folder"]
-        backup_folder = server_data["backup_folder"]
+        server_folder = short_to_full(server_data["server_folder"])
+        backup_folder = short_to_full(server_data["backup_folder"])
 
         game_version = None
         try:
             game_version = server_data["game_version"]
         except KeyError:
             pass
+
+        notify_bot = None
+        try:
+            notify_bot_settings = server_data["notify_bot_settings"]
+            notify_bot = NotifyBot(*notify_bot_settings)
+        except KeyError:
+            pass
+
         server_info.append(mc.MCserver(server_name, server_type, server_folder,
-                                       backup_folder, game_version=game_version))
+                                       backup_folder, notify_bot=notify_bot, game_version=game_version))
 
     global servers
     servers = server_info
+
 
 def getServerByName(name) -> mc.MCserver | None:
     for server in servers:
         if server.name == name:
             return server
     return None
+
 
 def setServerInfoToJson():
     servers_list = {}
@@ -72,25 +110,26 @@ def setServerInfoToJson():
         backup_folder = server.backup_location
         server_type = server.server_type.name
         game_version = server.game_version
+        notify_bot = server.notify_bot
+
+        servers_list[server_name] = {
+            "server_type": server_type,
+            "server_folder": full_to_short(server_folder),
+            "backup_folder": full_to_short(backup_folder),
+        }
 
         if game_version is not None:
-            servers_list[server_name] = {
-                "server_type": server_type,
-                "server_folder": server_folder,
-                "backup_folder": backup_folder,
-                "game_version": game_version
-            }
-        else:
-            servers_list[server_name] = {
-                "server_type": server_type,
-                "server_folder": server_folder,
-                "backup_folder": backup_folder,
-            }
+            servers_list[server_name]["game_version"] = game_version
 
-    server_info = {"servers_folder": servers_folder, "backups_folder": backups_folder,"servers_list": servers_list}        
+        if notify_bot is not None:
+            servers_list[server_name]["notify_bot_settings"] = notify_bot.get_settings()
+
+    servers_info = {"servers_folder": full_to_short(servers_folder, run_path_only=True),
+                    "backups_folder": full_to_short(backups_folder, run_path_only=True), "servers_list": servers_list}
 
     with open(serversJson, 'w', encoding='utf-8') as json_file:
-        json.dump(server_info, json_file, indent=4)
+        json.dump(servers_info, json_file, indent=4)
+
 
 def asyncCreateServer(name, server_type: ServerType, game_version: str):
     def createServer(name, server_type: ServerType, game_version: str):
@@ -98,16 +137,20 @@ def asyncCreateServer(name, server_type: ServerType, game_version: str):
         server_creation_threads.pop(name)
         if not server_folder:
             return None
-        servers.append(mc.MCserver(name, server_type, server_folder, os.path.join(backups_folder, name), game_version=game_version))
+        servers.append(mc.MCserver(name, server_type, server_folder, os.path.join(backups_folder, name),
+                                   game_version=game_version))
         setServerInfoToJson()
         return getServerByName(name)
+
     creation_thread = Thread(target=createServer, args=(name, server_type, game_version))
     creation_thread.start()
     server_creation_threads[name] = creation_thread
 
+
 def asyncDeleteServer(name):
     print(f"Deleting server {name}...")
     result = [None]
+
     def asyncDeleteServer():
         server = getServerByName(name)
         if server is None:
@@ -134,9 +177,10 @@ def asyncDeleteServer(name):
         print(f"Server \"{name}\" deleted successfully.")
         result[0] = True
         return True
-    
+
     thread = Thread(target=asyncDeleteServer)
     thread.start()
+
 
 if __name__ == '__main__':
     initServers()

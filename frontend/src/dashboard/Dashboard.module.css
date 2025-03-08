@@ -13,6 +13,19 @@
     display: flex;
 }
 
+.centerNavbar {
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+    gap: 15px;
+}
+.centerNavbar img {
+    height: 40px;
+}
+
 .navbarLinks {
     margin-right: 30px;
 }

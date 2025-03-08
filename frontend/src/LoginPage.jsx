@@ -30,7 +30,7 @@ function LoginPage() {
       const data = await response.json();
       if (response.status == 200) {
         console.log(data["message"]);
-        setAuthCookie(data["token"]);
+        setAuthCookie(data["token"], username);
         navigate("/servers");
       } else {
         alert(data["message"]);
@@ -57,33 +57,35 @@ function LoginPage() {
             <h1 className={styles.header}></h1>
             <div className={styles.container}>
                 <form onSubmit={handleSubmit} className={styles.form}>
-                  <h2>Login</h2>
-                  <div className={styles.inputGroup}>
-                      <label htmlFor="username">Username:</label>
-                      <input
-                        type="username"
-                        id="username"
-                        value={username}
-                        onChange={handleEmailChange}
-                        required
-                        className={styles.input}
-                        placeholder='Username'
-                      />
-                  </div>
-                  <div className={styles.inputGroup}>
-                      <label htmlFor="password">Password:</label>
-                      <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={handlePasswordChange}
-                        required
-                        className={styles.input}
-                        placeholder='Password'
-                      />
-                  </div>
-                  
-                  <button type="submit" className={styles.button}>Login<i className="fa-solid fa-right-to-bracket"></i></button>
+                    <img className={styles.logo} src="/assets/logo.svg" alt="logo"/>
+                    <h2>Login</h2>
+                    <div className={styles.inputGroup}>
+                        <label htmlFor="username">Username:</label>
+                        <input
+                            type="username"
+                            id="username"
+                            value={username}
+                            onChange={handleEmailChange}
+                            required
+                            className={styles.input}
+                            placeholder='Username'
+                        />
+                    </div>
+                    <div className={styles.inputGroup}>
+                        <label htmlFor="password">Password:</label>
+                        <input
+                            type="password"
+                            id="password"
+                            value={password}
+                            onChange={handlePasswordChange}
+                            required
+                            className={styles.input}
+                            placeholder='Password'
+                        />
+                    </div>
+
+                    <button type="submit" className={styles.button}>Login<i
+                        className="fa-solid fa-right-to-bracket"></i></button>
                 </form>
             </div>
         </>

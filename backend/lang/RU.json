@@ -1,0 +1,10 @@
+{
+
+  "server_event.server_starting": "Сервер \"{}\" запускается",
+  "server_event.server_started": "Сервер \"{}\" запущен",
+  "server_event.server_stopped": "Сервер \"{}\" остановлен",
+  "server_event.player_join": "Игрок {} присоединился",
+  "server_event.player_leave": "Игрок {} покинул игру",
+  "server_event.player_achievement": "Игрок {} получил достижение \"{}\"",
+  "server_event.player_death": "{}"
+}

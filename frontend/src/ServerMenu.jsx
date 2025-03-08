@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import styles from './ServerMenu.module.css';
-import {getAuthHeader, userHasPermissionTo} from './AuthorizationHelper.jsx';
+import {getAuthHeader, getUsername, userHasPermissionTo} from './AuthorizationHelper.jsx';
 import API_SERVER from './Constants.jsx'
 import { useNavigate } from "react-router-dom";
 
@@ -11,6 +11,7 @@ function ServerMenu() {
     const [deleteServerPopup, setDeleteServerPopup] = useState(false);
     const [confirmDeletionInput, setConfirmDeletionInput] = useState('');
     const [finalDeleteButtonEnabled, setFinalDeleteButtonEnabled] = useState(false);
+    const [showUserProfile, setshowUserProfile] = useState(false);
     const navigate = useNavigate();
 
     function goToServer(serverName) {
@@ -153,9 +154,18 @@ function ServerMenu() {
 
     return (
         <>
+            <div className={styles.userProfile}>
+                <div className={styles.username} onClick={() => setshowUserProfile(!showUserProfile)}>{getUsername()}</div>
+                {/*{showUserProfile ? <div className={styles.userProfileDropdown}>*/}
+                {/*    <button>Logout</button>*/}
+                {/*</div> : ""}*/}
+                <div className={styles.userProfileDropdown} style={showUserProfile ? {visibility: "visible", opacity: "100%"} : {visibility: "hidden", opacity: "0%"}}>
+                    <button onClick={() => navigate("/login")}>Logout</button>
+                </div>
+            </div>
             <h1 className={styles.pageTitle}>Servers</h1>
             <table className={styles.serverTable}>
-                {serverHTML}
+            {serverHTML}
             </table>
             {serverCreationPermissions ? <button onClick={openServerCreator} className={styles.addServerBtn}> + </button> : ""}
 

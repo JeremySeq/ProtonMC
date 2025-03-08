@@ -91,11 +91,16 @@ function Dashboard() {
                     <h2 className={styles.serverName}>{serverName}</h2>
                     <h2 className={styles.pageName}> | {getPageFromPath()}</h2>
                 </div>
-                
+
+                <div className={styles.centerNavbar}>
+                    <img className={styles.logo} src="/assets/logo.svg" alt="logo"/>
+                    <h2 className={styles.brand}>ProtonMC</h2>
+                </div>
+
 
                 <div className={styles.rightSide}>
 
-                    <div className={styles.navbarLinks}>
+                <div className={styles.navbarLinks}>
                         {navbarLinks.map((link) => (
                             <Link
                                 key={link.path}
@@ -105,7 +110,7 @@ function Dashboard() {
                             </Link>
                         ))}
                     </div>
-                    
+
                 </div>
             </div>
 

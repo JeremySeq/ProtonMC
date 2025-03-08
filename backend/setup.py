@@ -1,25 +1,30 @@
 import json
 import os
 import secrets
+from pathlib import Path
 
 from colorama import Fore, Style
 from dotenv import load_dotenv, set_key
 
+RUN_PATH_SHORTCUT = "<run_path>"  # character to represent the installation path
+SERVERS_FOLDER_SHORTCUT = "<servers_folder" # character to represent the main path
+# for example, if a server is in the overall servers folder, its path would just be "+\\<servername>"
+BACKUPS_FOLDER_SHORTCUT = "<backups_folder>"
+
 # File paths
-SERVERS_JSON = 'servers.json'
-USERS_JSON = 'users.json'
-ENV_FILE = 'backend/.env'
+SERVERS_JSON = Path("servers.json")
+USERS_JSON = Path("users.json")
+ENV_FILE = Path("backend/.env")
 
 
 def create_default_servers_json():
     """Creates the default servers.json file."""
-    default_servers_data = {
-        "servers_folder": os.path.join(os.getcwd(), "servers"),
-        "backups_folder": os.path.join(os.getcwd(), "backups"),
+    default_server_data = {
+        "servers_folder": os.path.join(RUN_PATH_SHORTCUT, "servers"),
+        "backups_folder": os.path.join(RUN_PATH_SHORTCUT, "backups"),
         "servers_list": {}
     }
-    with open(SERVERS_JSON, "w", encoding="utf-8") as file:
-        json.dump(default_servers_data, file, indent=4)
+    SERVERS_JSON.write_text(json.dumps(default_server_data, indent=4), encoding="utf-8")
     print(f"{SERVERS_JSON} created.")
 
 
@@ -32,69 +37,78 @@ def create_default_users_json():
             "permissions": 5
         }
     }
-    with open(USERS_JSON, "w", encoding="utf-8") as file:
-        json.dump(default_users_data, file, indent=4)
+    USERS_JSON.write_text(json.dumps(default_users_data, indent=4), encoding="utf-8")
     print(f"{USERS_JSON} created.")
-    print("Username: " + Fore.CYAN + "admin" + Style.RESET_ALL)
-    print("Password: " + Fore.CYAN + "admin123" + Style.RESET_ALL)
+    print(f"Username: {Fore.CYAN}admin{Style.RESET_ALL}")
+    print(f"Password: {Fore.CYAN}admin123{Style.RESET_ALL}")
+
 
 def create_default_env_file():
-    """Creates the default .env file with a SECRET_KEY."""
+    """Creates the default .env file with a SECRET_KEY and LANG."""
     secret_key = secrets.token_hex(16)
-    with open(ENV_FILE, "w", encoding="utf-8") as file:
-        file.write(f"SECRET_KEY=\"{secret_key}\"\n")
-    print(f"{ENV_FILE} created with a generated SECRET_KEY.")
+    ENV_FILE.write_text(f'SECRET_KEY="{secret_key}"\nLANG="EN"\n', encoding="utf-8")
+    print(f"{ENV_FILE} created with a generated SECRET_KEY and LANG set to 'EN'.")
+
 
 def ask_for_curseforge_api_key():
     """Prompts the user for the CurseForge API key and saves it to .env."""
-    cf_api_key = input(Fore.CYAN + "Please paste your CurseForge API Key: " + Style.RESET_ALL)
-
-    # Save the provided key to the .env file
-    load_dotenv()  # Load existing .env to set the key properly
-    set_key(ENV_FILE, 'CURSEFORGE_API_KEY', cf_api_key)
+    cf_api_key = input(f"{Fore.CYAN}Please paste your CurseForge API Key: {Style.RESET_ALL}")
+    load_dotenv()
+    set_key(str(ENV_FILE), 'CURSEFORGE_API_KEY', cf_api_key)
     print("CURSEFORGE_API_KEY has been set in the .env file.")
 
-def verify_json_file(file_path, create_default_func):
+
+def ensure_lang_setting():
+    """Ensures a language setting exists in .env, defaults to 'EN' if missing."""
+    load_dotenv()
+    if not os.getenv('LANG'):
+        set_key(str(ENV_FILE), 'LANG', "EN")
+        print("LANG not found in .env, setting it to 'EN'.")
+    else:
+        print("LANG is already set.")
+
+
+def verify_json_file(file_path: Path, create_default_func):
     """Checks if a JSON file exists and is valid, or creates it."""
-    if not os.path.exists(file_path):
+    if not file_path.exists():
         print(f"{file_path} not found.")
         create_default_func()
     else:
         try:
-            with open(file_path, 'r', encoding='utf-8') as file:
-                json.load(file)  # Try loading the JSON data to verify it's valid
+            json.loads(file_path.read_text(encoding='utf-8'))
         except json.JSONDecodeError:
             print(f"Error decoding {file_path}, recreating it...")
             create_default_func()
         else:
-            print(f"{file_path} is all good!")
+            print(f"{file_path} is valid.")
+
 
 def verify_env_file():
-    """Checks if the .env file exists and has a valid SECRET_KEY."""
-    if not os.path.exists(ENV_FILE):
+    """Checks if the .env file exists and has a valid SECRET_KEY and LANG."""
+    if not ENV_FILE.exists():
         print(f"{ENV_FILE} not found.")
         create_default_env_file()
     else:
-        load_dotenv()  # Load the .env file
+        load_dotenv()
         secret_key = os.getenv('SECRET_KEY')
-
-        if secret_key is None:
+        if not secret_key:
             secret_key = secrets.token_hex(16)
-            set_key(ENV_FILE, 'SECRET_KEY', secret_key)
-            print("Generated a secret key in .env file.")
+            set_key(str(ENV_FILE), 'SECRET_KEY', secret_key)
+            print("Generated a new SECRET_KEY in .env file.")
         else:
-            print("SECRET_KEY is all good!")
+            print("SECRET_KEY is valid.")
+
+        ensure_lang_setting()
 
 def verify_curseforge_api_key():
     """Checks if CURSEFORGE_API_KEY exists in the .env file."""
     load_dotenv()
-    cf_api_key = os.getenv('CURSEFORGE_API_KEY')
-
-    if cf_api_key is None:
+    if not os.getenv('CURSEFORGE_API_KEY'):
         print("CURSEFORGE_API_KEY not found in the .env file.")
         ask_for_curseforge_api_key()  # Ask user to provide the key
     else:
-        print("CURSEFORGE_API_KEY is all good!")
+        print("CURSEFORGE_API_KEY is valid.")
+
 
 if __name__ == "__main__":
     # Verify and create all necessary files if they don't exist

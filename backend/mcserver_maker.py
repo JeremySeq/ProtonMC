@@ -53,7 +53,7 @@ def accept_eula(server_folder):
         eula_file.write("eula=true\n")
         print("Eula file created.")
 
-def create_run_scripts(server_folder, jdk_path, jar_file, java_gb=4):
+def create_run_scripts(server_folder, jar_file, java_gb=4):
     """
     Creates run.bat and run.sh files to run the server jar.
 
@@ -68,14 +68,14 @@ def create_run_scripts(server_folder, jdk_path, jar_file, java_gb=4):
     java_gb = 4
     with open(os.path.join(server_folder, 'run.bat'), 'w', encoding="utf-8") as run_file:
         run_lines = [
-            f"\"{jdk_path}/bin/java.exe\" -Xmx{java_gb}G -Xms{java_gb}G -jar {jar_file} nogui"
+            f"\"%JAVA_HOME%\\bin\\java\" -Xmx{java_gb}G -Xms{java_gb}G -jar {jar_file} nogui"
         ]
         run_file.write("\n".join(run_lines))
 
     # For Linux, create a run.sh file.
     with open(os.path.join(server_folder, 'run.sh'), 'w', encoding="utf-8") as run_file:
         run_lines = [
-            f"\"{jdk_path}/bin/java\" -Xmx{java_gb}G -Xms{java_gb}G -jar {jar_file} nogui"
+            f"\"$JAVA_HOME/bin/java\" -Xmx{java_gb}G -Xms{java_gb}G -jar {jar_file} nogui"
         ]
         run_file.write("\n".join(run_lines))
 
@@ -83,15 +83,13 @@ def create_run_scripts(server_folder, jdk_path, jar_file, java_gb=4):
     os.chmod(os.path.join(server_folder, 'run.sh'), 0o755)
 
 
-def edit_forge_run_scripts(server_folder, jdk_path):
+def edit_forge_run_scripts(server_folder):
     """
     Edits the run.sh and run.bat files to replace the Java command with the given JDK path.
     Also removes the "pause" command from the run.bat
     """
 
     file_path = os.path.join(server_folder, 'run.sh')
-
-    java_path = os.path.join(jdk_path, "bin", "java")
     try:
         # Read the original file content
         with open(file_path, 'r') as file:
@@ -101,7 +99,7 @@ def edit_forge_run_scripts(server_folder, jdk_path):
         with open(file_path, 'w') as file:
             for line in lines:
                 if line.strip().startswith("java"):
-                    line = line.replace("java", '"' + java_path + '"', 1)
+                    line = line.replace("java", '"$JAVA_HOME/bin/java"', 1)
                 file.write(line)
         print("Java path replacement complete for run.sh.")
     except FileNotFoundError:
@@ -119,7 +117,7 @@ def edit_forge_run_scripts(server_folder, jdk_path):
         with open(file_path, 'w') as file:
             for line in lines:
                 if line.strip().startswith("java"):
-                    line = line.replace("java", '"' + java_path + '"', 1)
+                    line = line.replace("java", '"%JAVA_HOME%\\bin\\java"', 1)
                 if line.strip().startswith("pause"):
                     line = ""
                 file.write(line)
@@ -145,9 +143,9 @@ def install_spigot_server(server_folder, game_version):
     # Create and setup the run.bat and run.sh files.
 
     # Get the JDK needed to run this server.
-    jdk_path = jdk_installations.install_jdk_for_mc_version(game_version)
+    jdk_installations.install_jdk_for_mc_version(game_version)
 
-    create_run_scripts(server_folder, jdk_path, f"spigot-{game_version}.jar")
+    create_run_scripts(server_folder, f"spigot-{game_version}.jar")
 
     return True
 
@@ -222,11 +220,11 @@ def install_forge_server(server_folder, game_version):
 
     if os.path.exists(os.path.join(server_folder, "run.bat")):
         print("Editing Forge run scripts...")
-        edit_forge_run_scripts(server_folder, jdk_path)
+        edit_forge_run_scripts(server_folder)
     else:
         print("Creating run scripts...")
         latest_jar = get_latest_jar(server_folder)
-        create_run_scripts(server_folder, jdk_path, latest_jar)
+        create_run_scripts(server_folder, latest_jar)
 
     return True
 
@@ -301,7 +299,7 @@ def install_neoforge_server(server_folder, game_version: str):
         if line != "":
             print(line.decode('utf-8'))
 
-    edit_forge_run_scripts(server_folder, jdk_path)
+    edit_forge_run_scripts(server_folder)
 
     return True
 
@@ -327,9 +325,10 @@ def install_fabric_server(server_folder, game_version):
         print(f"Error: {e}")
         return False
 
+    jdk_installations.install_jdk_for_mc_version(game_version)
+
     # Create the run.bat and run.sh files.
-    jdk_path = jdk_installations.install_jdk_for_mc_version(game_version)
-    create_run_scripts(server_folder, jdk_path, filename)
+    create_run_scripts(server_folder, filename)
 
     return True
 

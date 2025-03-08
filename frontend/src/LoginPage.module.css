@@ -23,16 +23,24 @@ body {
     /* outline: 2px solid var(--primary); */
 }
 
+.logo {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
 .form {
+    padding-top: 40px;
     font-size: 18pt;
     font-family: "Roboto", sans-serif;
     letter-spacing: 1px;
 }
 
 .form h2 {
-    margin-top: 60px;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 15px;
     font-size: 24pt;
 }
 

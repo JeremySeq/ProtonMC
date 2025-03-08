@@ -16,8 +16,9 @@ function getCookie(cname) {
     return "";
 }
 
-export function setAuthCookie(token) {
-  document.cookie = `Authorization=${encodeURIComponent(token)}; path=/`;
+export function setAuthCookie(token, username) {
+    document.cookie = `Authorization=${encodeURIComponent(token)}; path=/`;
+    document.cookie = `username=${encodeURIComponent(username)}; path=/`;
 }
 
 export function getAuthHeader() {
@@ -25,6 +26,10 @@ export function getAuthHeader() {
     return {
         "Authorization": "Bearer " + token
     }
+}
+
+export function getUsername() {
+    return getCookie("username");
 }
 
 export function hasAuth() {

@@ -18,6 +18,7 @@ from server_types import ServerType
 import mod_helper
 from notify import ServerEvent, NotifyBot
 from util import *
+import jdk_installations
 
 
 class MCserver:
@@ -389,10 +390,13 @@ class MCserver:
         # set operational status as false in case it was true before
         self.is_operational = False
 
+        java_path = jdk_installations.install_jdk_for_mc_version(self.game_version)
+
         # Use run.bat or run.sh file (depending on the operating system)
         system = platform.system()
         # windows: run.bat
         if system == "Windows":
+            os.environ["JAVA_HOME"] = java_path
             serverRunPath = os.path.join(self.server_location, "run.bat")
 
             self.subprocess = subprocess.Popen(
@@ -403,6 +407,8 @@ class MCserver:
                 stderr=subprocess.STDOUT
             )
         else:  # linux/mac: run.sh
+            os.environ["JAVA_HOME"] = java_path
+            os.environ["PATH"] = f"{java_path}/bin:" + os.environ["PATH"]
             serverRunPath = os.path.join(self.server_location, "run.sh")
 
             self.subprocess = subprocess.Popen(

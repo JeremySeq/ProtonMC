@@ -44,9 +44,9 @@ def run_npm_build():
             print("`npm run build` completed successfully.")
 
     except FileNotFoundError:
-        print("Error: `npm` not found. Ensure Node.js and npm are installed.")
+        print("Warning: `npm` not found. Ensure Node.js and npm are installed.")
     except Exception:
-        print("Error: Skipping `npm run build`.")
+        print("Warning: Skipping `npm run build`.")
 
 def build():
     if os.path.exists(DIST_FOLDER):
@@ -62,6 +62,7 @@ def build():
     env = os.path.join(DIST_FOLDER, "backend", ".env")
     if os.path.exists(env):
         os.remove(env)
+    shutil.rmtree(os.path.join(DIST_FOLDER, "backend", "__pycache__"))
 
     # build frontend
     # Change directory to the frontend folder and run the build command

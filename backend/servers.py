@@ -7,16 +7,11 @@ import mc
 import mcserver_maker
 from notify import NotifyBot
 from server_types import ServerType
+from setup import SERVERS_FOLDER_SHORTCUT, BACKUPS_FOLDER_SHORTCUT, RUN_PATH_SHORTCUT
 
 serversJson = "servers.json"
 
 INSTALL_PATH = str(os.getcwd())  # actual installation path
-
-
-RUN_PATH_SHORTCUT = "<run_path>"  # character to represent the installation path
-SERVERS_FOLDER_SHORTCUT = "<servers_folder" # character to represent the main path
-# for example, if a server is in the overall servers folder, its path would just be "+\\<servername>"
-BACKUPS_FOLDER_SHORTCUT = "<backups_folder>"
 
 # data from the servers.json file
 servers = []

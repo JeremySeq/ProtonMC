@@ -6,6 +6,11 @@ from pathlib import Path
 from colorama import Fore, Style
 from dotenv import load_dotenv, set_key
 
+RUN_PATH_SHORTCUT = "<run_path>"  # character to represent the installation path
+SERVERS_FOLDER_SHORTCUT = "<servers_folder" # character to represent the main path
+# for example, if a server is in the overall servers folder, its path would just be "+\\<servername>"
+BACKUPS_FOLDER_SHORTCUT = "<backups_folder>"
+
 # File paths
 SERVERS_JSON = Path("servers.json")
 USERS_JSON = Path("users.json")
@@ -14,10 +19,9 @@ ENV_FILE = Path("backend/.env")
 
 def create_default_servers_json():
     """Creates the default servers.json file."""
-    import servers
     default_server_data = {
-        "servers_folder": f"{servers.RUN_PATH_SHORTCUT}\\servers",
-        "backups_folder": f"{servers.RUN_PATH_SHORTCUT}\\backups",
+        "servers_folder": f"{RUN_PATH_SHORTCUT}\\servers",
+        "backups_folder": f"{RUN_PATH_SHORTCUT}\\backups",
         "servers_list": {}
     }
     SERVERS_JSON.write_text(json.dumps(default_server_data, indent=4), encoding="utf-8")

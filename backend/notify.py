@@ -5,13 +5,13 @@ from enum import IntFlag, StrEnum
 import telebot
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True) # needs to override on Linux
 lang = os.getenv("LANG")
 
 # load language dict
 lang_file_path = os.path.join(os.getcwd(), "backend", "lang", lang + ".json")
 if not os.path.exists(lang_file_path):
-    raise FileNotFoundError("Could not find lang file. Check .env LANG property.")
+    raise FileNotFoundError(f"Could not find lang file for: {lang}. Check .env LANG property.")
 with open(lang_file_path) as lang_file:
     language_dict = json.load(lang_file)
 

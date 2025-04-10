@@ -1,5 +1,4 @@
-
-# ProtonMC
+# ![ProtonMC logo](https://github.com/user-attachments/assets/290a2a8b-b51c-4c5f-b285-3a7c2d801bd4)
 
 A website control panel for Minecraft servers.
 Built with Flask and React.

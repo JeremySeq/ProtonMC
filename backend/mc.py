@@ -424,7 +424,7 @@ class MCserver:
                 line = process.stdout.readline()
                 if not line and process.poll() is not None:
                     break
-                queue.put(line.decode())
+                queue.put(line.decode('utf-8', errors='replace'))
 
         qs = Queue()
         ts = Thread(target=server_read_lines, args=(self.subprocess, qs))

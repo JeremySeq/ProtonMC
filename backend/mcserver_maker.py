@@ -24,24 +24,50 @@ def build_spigot_jar(game_version, destination_folder):
     
     return False
 
+
+def get_getbukkit_download_link(version: str) -> str:
+    url = "https://getbukkit.org/download/spigot"
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise Exception("Failed to load GetBukkit page")
+
+    soup = BeautifulSoup(response.text, 'html.parser')
+    download_panes = soup.find_all("div", class_="download-pane")
+
+    for pane in download_panes:
+        version_header = pane.find("h2")
+        if version_header and version_header.text.strip() == version:
+            download_button = pane.find("a", class_="btn-download")
+            if download_button and download_button.has_attr("href"):
+                return download_button["href"]
+
+    raise ValueError(f"Version {version} not found on GetBukkit")
+
+
 def download_spigot_jar_using_getbukkit(version, destination_folder):
     """
     May not work anymore because getbukkit.org is down.
     """
 
-    spigot_download_link = "https://download.getbukkit.org/spigot/spigot-{}.jar"
+    try:
+        spigot_download_link = get_getbukkit_download_link(version)
 
-    download_link = spigot_download_link.format(version)
+        download_link = spigot_download_link.format(version)
 
-    response = requests.get(download_link)
+        response = requests.get(download_link)
 
-    if response.status_code == 200:
-        with open(os.path.join(destination_folder, f"spigot-{version}"), 'wb') as file:
-            file.write(response.content)
-            print("Server jar successfully downloaded.")
-    else:
-        print("Failed to download server jar.")
-        return
+        if response.status_code == 200:
+            with open(os.path.join(destination_folder, f"spigot-{version}.jar"), 'wb') as file:
+                file.write(response.content)
+                print("Server jar successfully downloaded.")
+                return True
+        else:
+            print("Failed to download server jar.")
+            return False
+    except Exception as e:
+        print(e)
+        print("Failed to download from GetBukkit.")
+        return False
     
 def accept_eula(server_folder):
     """
@@ -136,9 +162,12 @@ def install_spigot_server(server_folder, game_version):
         True if the server was successfully installed, False otherwise.
     """
 
-    # build the Spigot jar using BuildTools and copy it to the server folder
-    if not build_spigot_jar(game_version, server_folder):
-        return False
+
+    # try to download Spigot from getbukkit
+    if not download_spigot_jar_using_getbukkit(game_version, server_folder):
+        # build the Spigot jar using BuildTools and copy it to the server folder
+        if not build_spigot_jar(game_version, server_folder):
+            return False
 
     # Create and setup the run.bat and run.sh files.
 

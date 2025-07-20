@@ -2,7 +2,7 @@
 
 from flask import Blueprint
 from server_routes import server_routes
-from loginRoutes import loginRoutes
+from login_routes import loginRoutes
 
 api = Blueprint('api', __name__)
 

@@ -3,7 +3,7 @@ import os
 from flask import Blueprint, request, jsonify, send_from_directory
 import servers
 from server_types import ServerType
-from loginRoutes import token_required, requiresUserPermissionLevel
+from login_routes import token_required, requiresUserPermissionLevel
 import mod_helper
 from permissions import permissions
 import mcserver_maker

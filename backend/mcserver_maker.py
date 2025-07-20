@@ -479,15 +479,18 @@ def get_neoforge_versions_available() -> list[str]:
 
         directory_elements = soup.find_all(class_="directory")
 
-        versions = []
+        versions = set()
         for element in directory_elements:
-            text = element.text.removesuffix("/")
-            split = text.split(".")
-            text = "1." + split[0] + "." + split[1]
-            if text not in versions:
-                versions.append(text)
+            raw_version = element.text.removesuffix("/")
+            print(raw_version)
+            parts = raw_version.split(".")
+            if len(parts) >= 2 and parts[0].isdigit() and parts[1].isdigit():
+                mc_version = f"1.{parts[0]}.{parts[1]}"
+                versions.add(mc_version)
+            else:
+                continue
 
-        return versions
+        return sorted(versions)
     except requests.RequestException as e:
         print(f"Error: {e}")
         return []

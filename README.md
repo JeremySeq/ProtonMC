@@ -81,6 +81,21 @@ Only edit this file if you know what you're doing.
             - `notify_mode` - any desired combination of the following
                 - `SERVER_EVENTS = 1, PLAYER_CONN_EVENTS = 2, PLAYER_OTHER_EVENTS = 4`
 
+# Launcher
+
+A Tkinter-based GUI launcher is available for users who prefer a graphical interface over the command line.
+
+## Usage
+
+1. Make sure you have Python installed.
+2. Run the `launcher.py` script from the root directory:
+   ```bash
+   python launcher.py
+   ```
+3. The launcher window will open.
+   - Click the "Start Server" button to start the ProtonMC server. The server output will be displayed in the text area.
+   - Click the "Stop Server" button to stop the server.
+
 # Telegram Notifications
 
 ProtonMC can send Telegram messages for certain server events. Here's how to set it up.

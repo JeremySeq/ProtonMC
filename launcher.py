@@ -38,13 +38,14 @@ class Launcher(tk.Tk):
         self.output_area.insert(tk.INSERT, "Starting server...\n")
 
         self.process = subprocess.Popen(
-            ["python", "backend/main.py"],
+            ["python", "main.py"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
             universal_newlines=True,
-            creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+            creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
+            cwd="backend"
         )
 
         self.thread = threading.Thread(target=self.read_output)

@@ -24,6 +24,17 @@ class Launcher(tk.Tk):
     def start_server(self):
         self.start_button.config(state=tk.DISABLED)
         self.stop_button.config(state=tk.NORMAL)
+        self.output_area.insert(tk.INSERT, "Installing dependencies...\n")
+
+        try:
+            subprocess.check_call(["python", "-m", "pip", "install", "-r", "backend/requirements.txt"])
+            self.output_area.insert(tk.INSERT, "Dependencies installed successfully.\n")
+        except subprocess.CalledProcessError as e:
+            self.output_area.insert(tk.INSERT, f"Error installing dependencies: {e}\n")
+            self.start_button.config(state=tk.NORMAL)
+            self.stop_button.config(state=tk.DISABLED)
+            return
+
         self.output_area.insert(tk.INSERT, "Starting server...\n")
 
         self.process = subprocess.Popen(

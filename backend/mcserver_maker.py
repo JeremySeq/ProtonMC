@@ -176,6 +176,8 @@ def install_spigot_server(server_folder, game_version):
 
     create_run_scripts(server_folder, f"spigot-{game_version}.jar")
 
+    os.mkdir(os.path.join(server_folder, "plugins"))
+
     return True
 
 def install_forge_server(server_folder, game_version):

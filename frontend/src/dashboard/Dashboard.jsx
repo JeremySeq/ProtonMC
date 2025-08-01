@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import API_SERVER from "../Constants";
 import {getAuthHeader} from "../AuthorizationHelper";
 import styles from "./Dashboard.module.css";
+import socket from '../SocketConnection.js';
 
 function Dashboard() {
     const [sidebarOpen, setSidebarOpen] = useState(false);

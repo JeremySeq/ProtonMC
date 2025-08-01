@@ -108,3 +108,20 @@ def getRoute():
 
 def unauthorized():
     return jsonify({"message": "Unauthorized"}), 401
+
+
+def getUserFromSocketRequest(socket_request):
+    token = socket_request.args.get("Authorization")
+    if not token:
+        return None
+
+    try:
+        token = token.removeprefix("Bearer ")
+        data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
+        user = login.User.get(data["user"])
+        if not user:
+            return None
+    except Exception:
+        return None
+
+    return user

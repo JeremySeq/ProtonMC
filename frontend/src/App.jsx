@@ -14,54 +14,48 @@ import {hasAuth} from './AuthorizationHelper';
 import ErrorPage from './ErrorPage'
 import { NotificationProvider } from './NotificationContext';
 import ServerCreator from "./ServerCreator.jsx";
+import AppLayout from "./AppLayout.jsx";
 
 function App() {
   const router = createBrowserRouter([
     {
-      path: "/",
-      loader() {
-        if (hasAuth()) {
-          return redirect("/servers");
-        } else {
-          return redirect("/login");
-        }
-      },
-      errorElement: <ErrorPage></ErrorPage>
-    },
-    {
-      path: "/login",
-      element: <LoginPage></LoginPage>,
-    },
-    {
-      path: "/servers",
-      element: <ServerMenu></ServerMenu>,
-      loader() {return protectedLoader()}
-    },
-    {
-      path: "/create",
-      element: <ServerCreator></ServerCreator>,
-      loader() {return protectedLoader()}
-    },
-    {
-      path: "/servers/:serverName",
-      element: <Dashboard></Dashboard>,
-      loader() {return protectedLoader()},
+      element: <AppLayout />,  // Wrap all routes here
       children: [
         {
-          path: "overview",
-          element: <Overview></Overview>,
+          path: "/",
+          loader() {
+            if (hasAuth()) {
+              return redirect("/servers");
+            } else {
+              return redirect("/login");
+            }
+          },
+          errorElement: <ErrorPage />
         },
         {
-          path: "console",
-          element: <Console></Console>,
+          path: "/login",
+          element: <LoginPage />
         },
         {
-          path: "backups",
-          element: <Backups></Backups>,
+          path: "/servers",
+          element: <ServerMenu />,
+          loader: protectedLoader
         },
         {
-          path: "mods",
-          element: <Mods></Mods>
+          path: "/create",
+          element: <ServerCreator />,
+          loader: protectedLoader
+        },
+        {
+          path: "/servers/:serverName",
+          element: <Dashboard />,
+          loader: protectedLoader,
+          children: [
+            { path: "overview", element: <Overview /> },
+            { path: "console", element: <Console /> },
+            { path: "backups", element: <Backups /> },
+            { path: "mods", element: <Mods /> }
+          ]
         }
       ]
     }

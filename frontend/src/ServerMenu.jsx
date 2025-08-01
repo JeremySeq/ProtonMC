@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import styles from './ServerMenu.module.css';
-import {getAuthHeader, getUsername, userHasPermissionTo} from './AuthorizationHelper.jsx';
+import {getAuthHeader, getUsername, logout, userHasPermissionTo} from './AuthorizationHelper.jsx';
 import API_SERVER from './Constants.jsx'
 import { useNavigate } from "react-router-dom";
 
@@ -160,7 +160,9 @@ function ServerMenu() {
                 {/*    <button>Logout</button>*/}
                 {/*</div> : ""}*/}
                 <div className={styles.userProfileDropdown} style={showUserProfile ? {visibility: "visible", opacity: "100%"} : {visibility: "hidden", opacity: "0%"}}>
-                    <button onClick={() => navigate("/login")}>Logout</button>
+                    <button onClick={() => {
+                        logout().then(() => navigate("/login"))
+                    }}>Logout</button>
                 </div>
             </div>
             <h1 className={styles.pageTitle}>Servers</h1>

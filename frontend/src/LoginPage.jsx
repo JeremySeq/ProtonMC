@@ -2,7 +2,8 @@ import { useState } from 'react';
 import styles from './LoginPage.module.css'
 import API_SERVER from './Constants';
 import { useNavigate } from 'react-router-dom';
-import { setAuthCookie } from './AuthorizationHelper';
+import {setAuthCookie} from './AuthorizationHelper';
+import connectSocket from "./SocketConnection.js";
 
 function LoginPage() {
     const [username, setUsername] = useState('');
@@ -31,6 +32,7 @@ function LoginPage() {
       if (response.status == 200) {
         console.log(data["message"]);
         setAuthCookie(data["token"], username);
+        connectSocket();
         navigate("/servers");
       } else {
         alert(data["message"]);

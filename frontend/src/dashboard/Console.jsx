@@ -4,6 +4,7 @@ import styles from './Console.module.css';
 import API_SERVER from '../Constants';
 import { getAuthHeader } from '../AuthorizationHelper';
 import { useNotification } from '../NotificationContext';
+import {getSocket} from "../SocketConnection.js";
 
 function Console() {
     const [serverConsole, setServerConsole] = useState("");
@@ -116,16 +117,16 @@ function Console() {
             <div className={styles.consoleHeader}>
                 <h3>Server Console</h3>
             </div>
-            <div 
+            <div
                 id='console'
-                className={styles.console} 
+                className={styles.console}
                 dangerouslySetInnerHTML={{ __html: serverConsole }}
             />
             <div className={styles.commandGroup}>
                 <label htmlFor="consoleInput"><i className="fa-solid fa-angle-right"></i></label>
                 <input id='consoleInput' name='consoleInput' className={styles.consoleInput} type="text" autoComplete="off" placeholder='Enter a command' onKeyDown={keyDown}/>
             </div>
-            
+
         </div>
     );
 }

@@ -1,4 +1,5 @@
 import API_SERVER from './Constants.jsx'
+import {disconnectSocket} from "./SocketConnection.js";
 
 function getCookie(cname) {
     let name = cname + "=";
@@ -117,4 +118,12 @@ export async function userHasPermissionTo(action) {
             return false;
         }
     }
+}
+
+export async function logout() {
+    document.cookie = "Authorization=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+    document.cookie = "username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+    document.cookie = "Permissions=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+
+    disconnectSocket();
 }

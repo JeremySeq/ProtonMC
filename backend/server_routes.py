@@ -9,7 +9,7 @@ from permissions import permissions
 import mcserver_maker
 from mc import MCserver
 
-server_routes = Blueprint('backups', __name__)
+server_routes = Blueprint('servers', __name__)
 
 def check_server_exists(func):
     """Decorator for routes that checks if the server name 

@@ -62,15 +62,26 @@ function Console() {
     }
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            updateConsole();
-        }, 2500);
-
-        return () => clearInterval(interval);
-    }, [serverName]);
-
-    useEffect(() => {
         updateConsole();
+
+        const socket = getSocket();
+        if (!socket) return;
+
+        // listen for console line events
+        const handleNewLine = (line) => {
+            line = line["line"];
+            setServerConsole(prev => {
+                const updated = prev + '<br>' + addItalicsForTags(line);
+                updateConsoleContent(updated);
+                return updated;
+            });
+        };
+
+        socket.on("console", handleNewLine);
+
+        return () => {
+            socket.off("console", handleNewLine);
+        };
     }, []);
 
     async function sendCommand(command) {

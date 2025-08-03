@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 import API_SERVER from "./Constants.jsx";
-import {getAuthHeader} from "./AuthorizationHelper.jsx";
+import { getAuthHeader } from "./AuthorizationHelper.jsx";
 
 let socket = null;
 
@@ -13,7 +13,11 @@ export default function connectSocket() {
     socket = io(API_SERVER, {
         query: getAuthHeader()
     });
-    console.log("Connected to websocket.");
+
+    socket.on("connect", () => {
+        console.log("Connected to websocket with id: " + socket.id);
+    });
+
     return socket;
 }
 

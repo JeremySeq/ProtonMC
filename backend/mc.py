@@ -14,6 +14,8 @@ import progressbar
 import psutil
 
 import extract_mod_info
+from backend.permissions import permissions
+from backend.server_websockets import sendSocketMessage
 from server_types import ServerType
 import mod_helper
 from notify import ServerEvent, NotifyBot
@@ -470,7 +472,10 @@ class MCserver:
                                                        *didPlayerGotAchivement(text_after_tags))
 
                         line = hideIPIfPlayerJoined(line)
-                        self.console.append(line.strip())
+                        line = line.strip()
+                        self.console.append(line)
+                        sendSocketMessage("console", {"server": self.name, "line": line}, self.name,
+                                          "server_dashboard", "console", permission_level=permissions["view_console"])
         finally:
             self.players.clear()
             print("Subprocess ended, joining thread.")

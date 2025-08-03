@@ -15,5 +15,5 @@ colorama
 pyTelegramBotAPI
 asyncio
 aiohttp
-eventlet
 flask-socketio
+gevent

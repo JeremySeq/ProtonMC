@@ -67,5 +67,4 @@ def sendSocketMessage(socket_event: str, message: dict, server_id: str = None, p
             if user_permission < permission_level:
                 continue
 
-            print(f"EMIT: {socket_event}, {message}")
             socketio.emit(socket_event, message, to=user.sid)

@@ -14,8 +14,8 @@ import progressbar
 import psutil
 
 import extract_mod_info
-from backend.permissions import permissions
-from backend.server_websockets import sendSocketMessage
+from permissions import permissions
+from server_websockets import sendSocketMessage
 from server_types import ServerType
 import mod_helper
 from notify import ServerEvent, NotifyBot

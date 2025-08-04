@@ -1,9 +1,9 @@
 from flask import request
 from flask_socketio import emit
 
-from login import User
-from login_routes import getUserFromSocketRequest
 from app_instance import socketio, app
+from login_routes import getUserFromSocketRequest
+
 
 class SocketUser:
     def __init__(self, sid, user):
@@ -23,9 +23,9 @@ connected_users: dict[str, SocketUser] = {}  # sid -> page
 
 @socketio.on("connect")
 def handle_connect():
-    user: User = getUserFromSocketRequest(request)
+    user = getUserFromSocketRequest(request)
     if user is None:
-        print(f"Socket client rejected.")
+        print("Socket client rejected.")
         return False
     print(f"Socket client connected: {request.sid} - {user.username} - {request.remote_addr}")
     connected_users[request.sid] = SocketUser(request.sid, user)

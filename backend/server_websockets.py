@@ -3,6 +3,7 @@ from flask_socketio import emit
 
 from app_instance import socketio, app
 from login_routes import getUserFromSocketRequest
+from enum import Enum
 
 
 class SocketUser:
@@ -68,3 +69,22 @@ def sendSocketMessage(socket_event: str, message: dict, server_id: str = None, p
                 continue
 
             socketio.emit(socket_event, message, to=user.sid)
+
+class NotificationStatus(Enum):
+    # INFO = "info"
+    SUCCESS = "success"
+    WARNING = "warning"
+    ERROR = "error"
+
+def sendNotification(status: NotificationStatus, message: str, server_id: str = None, page: str = None, dash_page: str = None, permission_level: int = 0):
+    """
+    Sends notification to all users on page (for this server) with given permission level or higher.
+    If server_id is None, goes to clients on any server (or server menu).
+    If page is None, goes to clients on any page.
+    If dash_page is None, goes to clients on any dashboard subpage.
+    """
+    to_send = {
+        "status": status.value,
+        "message": message
+    }
+    sendSocketMessage("notification", to_send, server_id, page, dash_page, permission_level)

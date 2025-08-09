@@ -5,9 +5,11 @@ from threading import Thread
 
 import mc
 import mcserver_maker
+from permissions import permissions
 from notify import NotifyBot
 from server_types import ServerType
 from setup import SERVERS_FOLDER_SHORTCUT, BACKUPS_FOLDER_SHORTCUT, RUN_PATH_SHORTCUT
+from server_websockets import sendNotification, NotificationStatus
 
 serversJson = "servers.json"
 
@@ -136,10 +138,12 @@ def asyncCreateServer(name, server_type: ServerType, game_version: str):
         server_folder = mcserver_maker.create_server(name, servers_folder, server_type, game_version)
         server_creation_threads.pop(name)
         if not server_folder:
+            sendNotification(NotificationStatus.ERROR, f"Failed to create server: {name}", permission_level=permissions["create_server"])
             return None
         servers.append(mc.MCserver(name, server_type, server_folder, os.path.join(backups_folder, name),
                                    game_version=game_version))
         setServerInfoToJson()
+        sendNotification(NotificationStatus.SUCCESS, f"Created server: {name}", permission_level=permissions["create_server"])
         return getServerByName(name)
 
     creation_thread = Thread(target=createServer, args=(name, server_type, game_version))

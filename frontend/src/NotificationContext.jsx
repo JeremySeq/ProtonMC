@@ -1,5 +1,6 @@
-import { createContext, useState, useContext } from 'react';
+import {createContext, useState, useContext, useEffect} from 'react';
 import Notification from './Notification';
+import {getSocket} from "./SocketConnection.js";
 
 const NotificationContext = createContext();
 
@@ -12,6 +13,20 @@ export const NotificationProvider = ({ children }) => {
         children
     }
     const [notifications, setNotifications] = useState([]);
+
+    useEffect(() => {
+        const socket = getSocket();
+
+        const handleNotification = (e) => {
+            addNotification(e.message, e.status);
+        };
+
+        socket.on("notification", handleNotification);
+
+        return () => {
+            socket.off("notification", handleNotification);
+        };
+    }, []);
 
     const addNotification = (message, type) => {
         const id = new Date().getTime();

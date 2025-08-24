@@ -418,7 +418,7 @@ def get_spigot_versions_available() -> list[str]:
     url = f"https://hub.spigotmc.org/versions/"
     
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=2)
         soup = BeautifulSoup(response.text, "html.parser")
 
         directory_elements = soup.find_all("a")
@@ -437,7 +437,7 @@ def get_forge_versions_available() -> list[str]:
     url = "https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json"
     
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=2)
         data = response.json()
         version_dict = data["promos"]
         forge_versions = list(version_dict.keys())
@@ -475,7 +475,7 @@ def get_neoforge_versions_available() -> list[str]:
     url = f"https://maven.neoforged.net/releases/net/neoforged/neoforge/"
     
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=2)
 
         soup = BeautifulSoup(response.text, "html.parser")
 
@@ -484,7 +484,6 @@ def get_neoforge_versions_available() -> list[str]:
         versions = set()
         for element in directory_elements:
             raw_version = element.text.removesuffix("/")
-            print(raw_version)
             parts = raw_version.split(".")
             if len(parts) >= 2 and parts[0].isdigit() and parts[1].isdigit():
                 mc_version = f"1.{parts[0]}.{parts[1]}"
@@ -501,7 +500,7 @@ def get_fabric_versions_available() -> list[str]:
     url = f"https://meta.fabricmc.net/v2/versions"
     
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=2)
         data = response.json()
         data = data["game"]
         fabric_versions = [x["version"] for x in data]

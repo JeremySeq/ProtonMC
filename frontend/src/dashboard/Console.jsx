@@ -48,18 +48,21 @@ function Console() {
     }
 
     function updateConsoleContent(newContent) {
-        var consoleElement = document.getElementById("console");
-        var { scrollTop, scrollHeight, clientHeight } = consoleElement;
+        const consoleElement = document.getElementById("console");
+        const scrollBottom = consoleElement.scrollHeight - consoleElement.scrollTop - consoleElement.clientHeight;
 
         setServerConsole(newContent);
 
-        // auto scroll to bottom
+        // wait for DOM to update
         setTimeout(() => {
-            if (scrollHeight - scrollTop >= clientHeight - 10 && scrollHeight - scrollTop <= clientHeight + 10) {
-                document.getElementById("console").scrollTop = document.getElementById("console").scrollHeight;
+            // if user was near the bottom, scroll to bottom
+            if (scrollBottom < 50) {
+                consoleElement.scrollTop = consoleElement.scrollHeight;
             }
-        }, 0);
+        }, 1);
     }
+
+
 
     useEffect(() => {
         updateConsole();

@@ -1,0 +1,96 @@
+.bottomNav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 75px;
+    background: var(--light-bg);
+    /*border-top: 3px solid var(--primary-light);*/
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    outline: 3px solid var(--primary-light);
+}
+
+.bottomNav .navBtn {
+    background: none;
+    border: none;
+    color: var(--gray);
+    font-size: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.bottomNav .navBtn:hover {
+    color: var(--primary-light);
+}
+
+.selected {
+    color: var(--primary) !important;
+}
+
+i {
+
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100vh;
+    background-color: var(--light-bg);
+    color: var(--white);
+    transition: left 0.3s ease;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.sidebarOpen {
+    left: 0;
+}
+
+
+.links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 100px 15px 0;
+}
+
+.links a {
+    color: var(--gray);
+    text-decoration: none;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14pt;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.links a:hover {
+    background-color: var(--primary-bg);
+    color: var(--primary-light);
+}
+
+.activeLink {
+    background-color: var(--primary-light) !important;
+    color: var(--bg) !important;
+
+    /*outline: solid 2px var(--primary);*/
+    /*color: var(--primary) !important;*/
+    /*background-color: var(--primary-bg);*/
+    /* background-image: linear-gradient(to right, var(--bg), var(--light-bg)) !important;*/
+}
+
+.links a i {
+    font-size: 18px;
+}

@@ -3,16 +3,22 @@ import { useEffect, useState } from "react";
 import API_SERVER from "../Constants";
 import {getAuthHeader} from "../AuthorizationHelper";
 import styles from "./Dashboard.module.css";
-import socket from '../SocketConnection.js';
+import Navigation from "./Navigation.jsx";
+import isMobile from "./useIsMobile.js";
 
 function Dashboard() {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
     const [modsEnabled, setModsEnabled] = useState(false);
     const [pluginsEnabled, setPluginsEnabled] = useState(false);
 
     const { serverName } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+    const mobile = isMobile();
+
+    function isSidebarOpen() {
+        return sidebarOpen && !mobile;
+    }
 
     async function init() {
         const response = await fetch(`${API_SERVER}/api/servers/${serverName}`, {
@@ -46,7 +52,7 @@ function Dashboard() {
 
     const sidebarLinks = [
         { path: `/servers/${serverName}/overview`, label: "Overview", icon: "fa-solid fa-house" },
-        { path: `/servers/${serverName}/console`, label: "Console", icon: "fa-regular fa-file" },
+        { path: `/servers/${serverName}/console`, label: "Console", icon: "fa-solid fa-terminal" },
         { path: `/servers/${serverName}/backups`, label: "Backups", icon: "fa-solid fa-clone" }
     ];
 
@@ -79,8 +85,6 @@ function Dashboard() {
         return "";
     }
 
-    const currentPath = decodeURIComponent(location.pathname);
-
     return (
         <>
             <div className={styles.navbar}>
@@ -111,30 +115,13 @@ function Dashboard() {
                             </Link>
                         ))}
                     </div>
-
                 </div>
             </div>
 
-            <div
-                className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}
-                id="sidebar"
-            >
-                <div className={styles.links}>
-                    {sidebarLinks.map((link) => (
-                        <Link
-                            key={link.path}
-                            to={link.path}
-                            onClick={() => setSidebarOpen(false)}
-                            className={currentPath === link.path ? styles.activeLink : ""}
-                        >
-                            <i className={link.icon}></i>
-                            {link.label}
-                        </Link>
-                    ))}
-                </div>
-            </div>
+            {<Navigation serverName={serverName} sidebarLinks={sidebarLinks} sidebarOpen={isSidebarOpen()} />}
 
-            <div className={styles.content} onClick={() => setSidebarOpen(false)}>
+
+            <div className={`${styles.content} ${isSidebarOpen() ? styles.contentShift : ''}`}>
                 <Outlet />
             </div>
         </>

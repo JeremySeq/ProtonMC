@@ -7,6 +7,7 @@
     background-color: var(--light-bg);
     align-items: center;
     justify-content: space-between;
+    z-index: 20;
 }
 
 .leftSide {
@@ -75,7 +76,7 @@
 
 .sidebar {
     position: absolute;
-    top: 0%;
+    top: 0;
     left: -100%;
     height: 100%;
     min-width: 20%;
@@ -89,7 +90,7 @@
 }
 
 .sidebarOpen {
-    left: 0%;
+    left: 0;
 }
 
 
@@ -105,49 +106,14 @@
     margin-right: 50px;
 }
 
-.links a {
-    padding-top: 15px;
-    padding-bottom: 15px;
-
-    color: var(--text);
-    text-decoration: none;
-
-    /* text-indent: 15px; */
-
-    transition: .1s linear;
-
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: 10px;
-    width: 90%;
-    border-radius: 15px;
-}
-
-.links a i {
-    margin-left: 15px;
-    margin-right: 15px;
-}
-
-.links a:hover {
-    /* background-color: var(--bg); */
-    color: var(--primary);
-    /* border-left: solid 5px var(--secondary); */
-}
-
-.activeLink {
-    /* border-left: solid 5px var(--primary); */
-    /* outline: solid 2px var(--primary); */
-    color: var(--primary) !important;
-    background-color: var(--primary-bg);
-    /* background-image: linear-gradient(to right, var(--bg), var(--light-bg)); */
-}
-
 .content {
-    color: white;
-    position: absolute;
-    min-width: 100%;
-    min-height: 90%;
+    transition: margin-left 0.3s ease;
+    margin-left: 0;
+    padding: 5px;
+}
+
+.contentShift {
+    margin-left: 250px;
 }
 
 /* change notification background colors to not be transparent on mobile for easier readability */

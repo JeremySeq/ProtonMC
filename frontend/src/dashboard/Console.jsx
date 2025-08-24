@@ -70,6 +70,7 @@ function Console() {
         // listen for console line events
         const handleNewLine = (line) => {
             line = line["line"];
+            console.log(line);
             setServerConsole(prev => {
                 const updated = prev + '<br>' + addItalicsForTags(line);
                 updateConsoleContent(updated);
@@ -82,7 +83,7 @@ function Console() {
         return () => {
             socket.off("console", handleNewLine);
         };
-    }, []);
+    }, [addItalicsForTags, updateConsole]);
 
     async function sendCommand(command) {
         var form = new FormData();
@@ -94,9 +95,7 @@ function Console() {
         });
         const commandResponse = await response.json();
         if (response.status === 200) {
-            if (commandResponse["message"]) {
-                setTimeout(() => updateConsole(), 50);
-            } else {
+            if (!commandResponse["message"]) {
                 addNotification("Couldn't send command. Server is offline.", "error");
             }
         } else if (response.status === 401) {
